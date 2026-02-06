@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { User } from "../models/user.model";
+import { User } from "../user/user.model";
 
 export const getMe = async (req: any, res: Response) => {
     const user = await User.findById(req.user.id).select("-password");
