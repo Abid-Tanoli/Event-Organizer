@@ -15,12 +15,10 @@ import {
 const router: Router = Router();
 
 router.get("/reference/:reference", getTicketByReference);
-
 router.post("/create", createTicket);
 router.get("/get/:id", getTicketById);
 router.get("/user/:userId", getTicketsByUser);
 router.post("/cancel/:id", cancelTicket);
-
 router.get("/event/:eventId", getTicketsByEvent);
 router.get("/organizer/:organizerId", getTicketsByOrganizer);
 router.get("/stats/:eventId", getTicketStats);

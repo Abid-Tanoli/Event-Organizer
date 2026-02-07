@@ -1,4 +1,3 @@
-
 import { Router } from "express";
 import {
   createOrganizer,
@@ -16,12 +15,10 @@ const router: Router = Router();
 
 router.get("/approved", getApprovedOrganizers);
 router.get("/get/:id", getOrganizerById);
-
 router.post("/create", createOrganizer);
 router.get("/user/:userId", getOrganizerByUserId);
 router.get("/stats/:id", getOrganizerStats);
 router.put("/update/:id", updateOrganizer);
-
 router.get("/all", getAllOrganizers);
 router.put("/status/:id", updateOrganizerStatus);
 router.delete("/delete/:id", deleteOrganizer);

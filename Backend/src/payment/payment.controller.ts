@@ -1,11 +1,6 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { Ticket } from "../ticket/ticket.model";
-import { Event } from "../event/event.model";
-
-// Note: Install Stripe SDK: npm install stripe
-// import Stripe from "stripe";
-// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2023-10-16" });
 
 interface CreatePaymentIntentInput {
   ticketId: Types.ObjectId;
@@ -47,20 +42,6 @@ export const createPaymentIntent = async (
       });
     }
 
-    // TODO: Integrate with Stripe
-    // const paymentIntent = await stripe.paymentIntents.create({
-    //   amount: Math.round(amount * 100), // Convert to cents
-    //   currency: "usd",
-    //   metadata: {
-    //     ticketId: ticketId.toString(),
-    //     bookingReference: ticket.bookingReference,
-    //   },
-    // });
-
-    // ticket.paymentIntentId = paymentIntent.id;
-    // await ticket.save();
-
-    // For now, return mock data
     const mockPaymentIntent = {
       id: `pi_mock_${Date.now()}`,
       client_secret: `pi_mock_secret_${Date.now()}`,
@@ -110,16 +91,6 @@ export const verifyPayment = async (
       });
     }
 
-    // TODO: Verify with Stripe
-    // const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-    
-    // if (paymentIntent.status === "succeeded") {
-    //   ticket.paymentStatus = "completed";
-    //   ticket.transactionId = paymentIntent.id;
-    //   await ticket.save();
-    // }
-
-    // For now, mock successful payment
     ticket.paymentStatus = "completed";
     ticket.transactionId = paymentIntentId;
     await ticket.save();
@@ -137,27 +108,8 @@ export const verifyPayment = async (
   }
 };
 
-export const handleWebhook = async (req: Request, res: Response) => {
+export const handleWebhook = async (_req: Request, res: Response) => {
   try {
-    // TODO: Verify webhook signature
-    // const sig = req.headers["stripe-signature"];
-    // const event = stripe.webhooks.constructEvent(
-    //   req.body,
-    //   sig!,
-    //   process.env.STRIPE_WEBHOOK_SECRET!
-    // );
-
-    // Handle different event types
-    // switch (event.type) {
-    //   case "payment_intent.succeeded":
-    //     const paymentIntent = event.data.object;
-    //     // Update ticket status
-    //     break;
-    //   case "payment_intent.payment_failed":
-    //     // Handle failed payment
-    //     break;
-    // }
-
     return res.status(200).json({ received: true });
   } catch (error) {
     return res.status(400).json({
@@ -204,13 +156,6 @@ export const processRefund = async (
       });
     }
 
-    // TODO: Process refund with Stripe
-    // const refund = await stripe.refunds.create({
-    //   payment_intent: ticket.paymentIntentId!,
-    //   amount: Math.round(ticket.finalAmount * 100),
-    // });
-
-    // For now, mock refund
     ticket.paymentStatus = "refunded";
     ticket.refundAmount = ticket.finalAmount;
     ticket.refundDate = new Date();

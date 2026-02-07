@@ -143,10 +143,6 @@ const organizerSchema = new mongoose.Schema<OrganizerModel>(
   { timestamps: true }
 );
 
-// Index for searching organizers
 organizerSchema.index({ organizationName: "text", description: "text" });
 
-export const Organizer = mongoose.model<OrganizerModel>(
-  "Organizer",
-  organizerSchema
-);
+export const Organizer = mongoose.model<OrganizerModel>("Organizer", organizerSchema);

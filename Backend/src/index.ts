@@ -1,8 +1,8 @@
 import express, { Application, Request, Response, NextFunction } from "express";
 import cors from "cors";
-import mongoose from "mongoose";
 import dotenv from "dotenv";
 
+import { connectDB } from "./config/database";
 import organizerRoutes from "./organizer/organizer.routes";
 import eventRoutes from "./event/event.routes";
 import ticketRoutes from "./ticket/ticket.routes";
@@ -30,13 +30,11 @@ app.get("/health", (_req: Request, res: Response) => {
   });
 });
 
-// API Routes
 app.use("/api/organizers", organizerRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/payments", paymentRoutes);
 
-// 404 handler
 app.use((_req: Request, res: Response) => {
   res.status(404).json({
     success: false,
@@ -44,7 +42,6 @@ app.use((_req: Request, res: Response) => {
   });
 });
 
-// Global error handler
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error("Error:", err);
   res.status(500).json({
@@ -54,19 +51,6 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   });
 });
 
-// Database connection
-const connectDB = async () => {
-  try {
-    const mongoURI = process.env.MONGO_URI || "mongodb://localhost:27017/event-booking";
-    await mongoose.connect(mongoURI);
-    console.log("✅ MongoDB connected successfully");
-  } catch (error) {
-    console.error("❌ MongoDB connection error:", error);
-    process.exit(1);
-  }
-};
-
-// Start server
 const startServer = async () => {
   await connectDB();
   app.listen(PORT, () => {

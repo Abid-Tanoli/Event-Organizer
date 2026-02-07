@@ -290,15 +290,11 @@ const eventSchema = new mongoose.Schema<EventModel>(
   { timestamps: true }
 );
 
-// Text index for search functionality
 eventSchema.index({ title: "text", description: "text", tags: "text" });
-
-// Compound indexes for common queries
 eventSchema.index({ status: 1, eventDate: 1 });
 eventSchema.index({ category: 1, eventDate: 1 });
 eventSchema.index({ organizer: 1, status: 1 });
 
-// Pre-save middleware to update available tickets
 eventSchema.pre("save", function (next) {
   if (this.isModified("soldTickets") || this.isModified("totalTickets")) {
     this.availableTickets = this.totalTickets - this.soldTickets;

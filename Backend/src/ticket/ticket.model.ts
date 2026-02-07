@@ -169,12 +169,10 @@ const ticketSchema = new mongoose.Schema<TicketModel>(
   { timestamps: true }
 );
 
-// Compound indexes for common queries
 ticketSchema.index({ user: 1, bookingStatus: 1 });
 ticketSchema.index({ event: 1, bookingStatus: 1 });
 ticketSchema.index({ organizer: 1, paymentStatus: 1 });
 
-// Generate booking reference before saving
 ticketSchema.pre("save", function (next) {
   if (!this.bookingReference) {
     this.bookingReference = `BK${Date.now()}${Math.random().toString(36).substring(2, 7).toUpperCase()}`;

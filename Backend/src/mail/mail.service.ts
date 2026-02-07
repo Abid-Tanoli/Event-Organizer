@@ -1,7 +1,6 @@
 import nodemailer from "nodemailer";
 import { mailConfig } from "../config/mail";
 
-// Create reusable transporter
 const transporter = nodemailer.createTransport(mailConfig);
 
 export interface EmailOptions {

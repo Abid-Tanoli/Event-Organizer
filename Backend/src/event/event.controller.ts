@@ -28,7 +28,6 @@ export const createEvent = async (
       });
     }
 
-    // Verify organizer exists and is approved
     const organizer = await Organizer.findById(parsed.data.organizer);
     if (!organizer) {
       return res.status(404).json({
@@ -44,7 +43,6 @@ export const createEvent = async (
       });
     }
 
-    // Calculate total tickets from ticket types
     const totalTickets = parsed.data.ticketTypes.reduce(
       (sum, ticket) => sum + ticket.quantity,
       0
@@ -59,7 +57,6 @@ export const createEvent = async (
 
     const event = await Event.create(eventData);
 
-    // Update organizer's total events count
     await Organizer.findByIdAndUpdate(parsed.data.organizer, {
       $inc: { totalEvents: 1 },
     });
@@ -99,7 +96,6 @@ export const getEventById = async (req: Request<{ id: string }>, res: Response) 
       });
     }
 
-    // Increment view count
     await Event.findByIdAndUpdate(id, { $inc: { views: 1 } });
 
     return res.status(200).json({
@@ -369,7 +365,6 @@ export const updateEvent = async (
 
     const updateData: any = { ...parsed.data };
 
-    // Recalculate total tickets if ticket types updated
     if (parsed.data.ticketTypes) {
       const totalTickets = parsed.data.ticketTypes.reduce(
         (sum, ticket) => sum + ticket.quantity,
@@ -536,7 +531,6 @@ export const deleteEvent = async (req: Request<{ id: string }>, res: Response) =
       });
     }
 
-    // Check if event has sold tickets
     if (event.soldTickets > 0) {
       return res.status(400).json({
         success: false,
@@ -546,7 +540,6 @@ export const deleteEvent = async (req: Request<{ id: string }>, res: Response) =
 
     await Event.findByIdAndDelete(id);
 
-    // Update organizer's total events count
     await Organizer.findByIdAndUpdate(event.organizer, {
       $inc: { totalEvents: -1 },
     });
@@ -563,10 +556,7 @@ export const deleteEvent = async (req: Request<{ id: string }>, res: Response) =
   }
 };
 
-export const incrementEventLikes = async (
-  req: Request<{ id: string }>,
-  res: Response
-) => {
+export const incrementEventLikes = async (req: Request<{ id: string }>, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -603,10 +593,7 @@ export const incrementEventLikes = async (
   }
 };
 
-export const incrementEventShares = async (
-  req: Request<{ id: string }>,
-  res: Response
-) => {
+export const incrementEventShares = async (req: Request<{ id: string }>, res: Response) => {
   try {
     const { id } = req.params;
 

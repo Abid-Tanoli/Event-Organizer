@@ -1,5 +1,3 @@
-// Additional email templates for various use cases
-
 export const getWelcomeEmailTemplate = (userName: string) => {
   return `
     <!DOCTYPE html>

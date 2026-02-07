@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
+import { ZodIssue } from "zod";
 import {
   CreateTicketInput,
   createTicketSchema,
@@ -23,11 +24,10 @@ export const createTicket = async (
     if (!parsed.success) {
       return res.status(400).json({
         success: false,
-        errors: parsed.error.issues.map((err) => err.message),
+        errors: parsed.error.issues.map((err: ZodIssue) => err.message),
       });
     }
 
-    // Verify event exists and has available tickets
     const event = await Event.findById(parsed.data.event);
     if (!event) {
       return res.status(404).json({
@@ -43,7 +43,6 @@ export const createTicket = async (
       });
     }
 
-    // Check ticket availability
     const totalRequestedTickets = parsed.data.tickets.reduce(
       (sum, ticket) => sum + ticket.quantity,
       0
@@ -56,7 +55,6 @@ export const createTicket = async (
       });
     }
 
-    // Verify each ticket type availability
     for (const requestedTicket of parsed.data.tickets) {
       const eventTicketType = event.ticketTypes.find(
         (tt) => tt.name === requestedTicket.ticketType
@@ -87,7 +85,6 @@ export const createTicket = async (
 
     const ticket = await Ticket.create(parsed.data);
 
-    // Update event ticket counts
     for (const bookedTicket of parsed.data.tickets) {
       const ticketTypeIndex = event.ticketTypes.findIndex(
         (tt) => tt.name === bookedTicket.ticketType
@@ -355,7 +352,7 @@ export const updateTicket = async (
     if (!parsed.success) {
       return res.status(400).json({
         success: false,
-        errors: parsed.error.issues.map((err) => err.message),
+        errors: parsed.error.issues.map((err: ZodIssue) => err.message),
       });
     }
 
@@ -406,7 +403,7 @@ export const cancelTicket = async (
     if (!parsed.success) {
       return res.status(400).json({
         success: false,
-        errors: parsed.error.issues.map((err) => err.message),
+        errors: parsed.error.issues.map((err: ZodIssue) => err.message),
       });
     }
 
@@ -433,12 +430,10 @@ export const cancelTicket = async (
       });
     }
 
-    // Update ticket status
     ticket.bookingStatus = "cancelled";
     ticket.cancellationReason = parsed.data.cancellationReason;
     await ticket.save();
 
-    // Restore event ticket counts
     const event = await Event.findById(ticket.event);
     if (event) {
       const totalCancelledTickets = ticket.tickets.reduce(
@@ -485,7 +480,7 @@ export const checkInTicket = async (
     if (!parsed.success) {
       return res.status(400).json({
         success: false,
-        errors: parsed.error.issues.map((err) => err.message),
+        errors: parsed.error.issues.map((err: ZodIssue) => err.message),
       });
     }
 
