@@ -33,6 +33,8 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server connected on port ${PORT}`);
 });
+<<<<<<< HEAD
+=======
 import express, { Application, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -97,3 +99,4 @@ const startServer = async () => {
 startServer();
 
 export default app;
+>>>>>>> origin/master
