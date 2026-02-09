@@ -2,7 +2,7 @@ import express, { Application, Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 
-import { connectDb } from "./config/db";
+import { connectDB } from "./config/database";
 
 import authRoutes from "./auth/auth.routes";
 import userRoutes from "./user/user.routes";
@@ -15,14 +15,14 @@ import paymentRoutes from "./payment/payment.routes";
 dotenv.config();
 
 const app: Application = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use((req: Request, _res: Response, next: NextFunction) => {
-  console.log(`${req.method} ${req.path}`);
+  console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);
   next();
 });
 
@@ -49,20 +49,17 @@ app.use((_req: Request, res: Response) => {
   });
 });
 
-app.use(
-  (err: Error, _req: Request, res: Response, _next: NextFunction) => {
-    console.error("Error:", err.message);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error:
-        process.env.NODE_ENV === "development" ? err.message : undefined,
-    });
-  }
-);
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  console.error("Error:", err.message);
+  res.status(500).json({
+    success: false,
+    message: "Internal server error",
+    error: process.env.NODE_ENV === "development" ? err.message : undefined,
+  });
+});
 
 const startServer = async () => {
-  await connectDb();
+  await connectDB();
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`🩺 Health: http://localhost:${PORT}/health`);

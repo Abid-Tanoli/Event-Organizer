@@ -2,10 +2,13 @@ import mongoose from "mongoose";
 
 export const connectDB = async (): Promise<void> => {
   try {
-    const mongoURI = process.env.MONGO_URI || "mongodb://localhost:27017/event-booking";
-    
+    const mongoURI = process.env.MONGO_URI;
+
+    if (!mongoURI) {
+      throw new Error("MongoDB connection string (MONGO_URI) is not defined in .env");
+    }
+
     await mongoose.connect(mongoURI);
-    
     console.log("✅ MongoDB connected successfully");
     console.log(`📊 Database: ${mongoose.connection.name}`);
   } catch (error) {
@@ -15,7 +18,7 @@ export const connectDB = async (): Promise<void> => {
 };
 
 mongoose.connection.on("disconnected", () => {
-  console.log("⚠️  MongoDB disconnected");
+  console.warn("⚠️ MongoDB disconnected");
 });
 
 mongoose.connection.on("error", (err) => {
