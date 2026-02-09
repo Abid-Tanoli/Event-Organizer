@@ -2,10 +2,8 @@ import express, { Application, Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 
-// DB
 import { connectDb } from "./config/db";
 
-// Routes
 import authRoutes from "./auth/auth.routes";
 import userRoutes from "./user/user.routes";
 import categoryRoutes from "./category/category.route";
@@ -19,18 +17,15 @@ dotenv.config();
 const app: Application = express();
 const PORT = process.env.PORT || 5000;
 
-// Middlewares
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Logger
 app.use((req: Request, _res: Response, next: NextFunction) => {
   console.log(`${req.method} ${req.path}`);
   next();
 });
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/category", categoryRoutes);
@@ -39,7 +34,6 @@ app.use("/api/events", eventRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/payments", paymentRoutes);
 
-// Health check
 app.get("/health", (_req: Request, res: Response) => {
   res.status(200).json({
     success: true,
@@ -48,7 +42,6 @@ app.get("/health", (_req: Request, res: Response) => {
   });
 });
 
-// 404 handler
 app.use((_req: Request, res: Response) => {
   res.status(404).json({
     success: false,
@@ -56,7 +49,6 @@ app.use((_req: Request, res: Response) => {
   });
 });
 
-// Global error handler
 app.use(
   (err: Error, _req: Request, res: Response, _next: NextFunction) => {
     console.error("Error:", err.message);
@@ -69,7 +61,6 @@ app.use(
   }
 );
 
-// Start server
 const startServer = async () => {
   await connectDb();
   app.listen(PORT, () => {
