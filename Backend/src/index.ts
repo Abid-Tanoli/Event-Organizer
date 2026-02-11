@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 
 import { connectDB } from "./config/database";
+import { logger } from "./middlewares/logger.middleware";
 
 import authRoutes from "./auth/auth.routes";
 import userRoutes from "./user/user.routes";
@@ -15,16 +16,12 @@ import paymentRoutes from "./payment/payment.routes";
 dotenv.config();
 
 const app: Application = express();
-const PORT = process.env.PORT || 5001;
+const PORT: number = Number(process.env.PORT) || 5000;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-app.use((req: Request, _res: Response, next: NextFunction) => {
-  console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);
-  next();
-});
+app.use(logger);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
@@ -50,7 +47,7 @@ app.use((_req: Request, res: Response) => {
 });
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error("Error:", err.message);
+  console.error("❌ Error:", err.message);
   res.status(500).json({
     success: false,
     message: "Internal server error",
@@ -58,12 +55,20 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   });
 });
 
-const startServer = async () => {
-  await connectDB();
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`🩺 Health: http://localhost:${PORT}/health`);
-  });
+const startServer = async (): Promise<void> => {
+  try {
+    if (!process.env.MONGO_URI) throw new Error("MONGO_URI not found in .env");
+
+    await connectDB();
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`🩺 Health: http://localhost:${PORT}/health`);
+    });
+  } catch (error) {
+    console.error("❌ Server start failed:", error);
+    process.exit(1);
+  }
 };
 
 startServer();

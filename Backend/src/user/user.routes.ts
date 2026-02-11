@@ -5,13 +5,10 @@ import { allowRoles } from "../middlewares/role.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { updateUserSchema } from "./user.schema";
 
-const router = Router();
+const router: Router = Router();
 
-// Logged-in user
 router.get("/me", protect, getMe);
 router.put("/me", protect, validate(updateUserSchema), updateMe);
-
-// Admin only
 router.get("/", protect, allowRoles("admin"), getAllUsers);
 
 export default router;

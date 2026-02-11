@@ -25,6 +25,7 @@ export const createOrganizer = async (
       });
     }
 
+    // Check if organizer already exists for this user
     const existingOrganizer = await Organizer.findOne({ user: parsed.data.user });
     if (existingOrganizer) {
       return res.status(400).json({
@@ -48,7 +49,10 @@ export const createOrganizer = async (
   }
 };
 
-export const getOrganizerById = async (req: Request<{ id: string }>, res: Response) => {
+export const getOrganizerById = async (
+  req: Request<{ id: string }>,
+  res: Response
+) => {
   try {
     const { id } = req.params;
 
@@ -81,7 +85,10 @@ export const getOrganizerById = async (req: Request<{ id: string }>, res: Respon
   }
 };
 
-export const getOrganizerByUserId = async (req: Request<{ userId: string }>, res: Response) => {
+export const getOrganizerByUserId = async (
+  req: Request<{ userId: string }>,
+  res: Response
+) => {
   try {
     const { userId } = req.params;
 
@@ -114,7 +121,10 @@ export const getOrganizerByUserId = async (req: Request<{ userId: string }>, res
   }
 };
 
-export const getAllOrganizers = async (req: Request, res: Response) => {
+export const getAllOrganizers = async (
+  req: Request,
+  res: Response
+) => {
   try {
     const { status, search, page = 1, limit = 10 } = req.query;
 
@@ -159,7 +169,10 @@ export const getAllOrganizers = async (req: Request, res: Response) => {
   }
 };
 
-export const getApprovedOrganizers = async (req: Request, res: Response) => {
+export const getApprovedOrganizers = async (
+  req: Request,
+  res: Response
+) => {
   try {
     const { search, page = 1, limit = 10 } = req.query;
 
@@ -309,7 +322,10 @@ export const updateOrganizerStatus = async (
   }
 };
 
-export const deleteOrganizer = async (req: Request<{ id: string }>, res: Response) => {
+export const deleteOrganizer = async (
+  req: Request<{ id: string }>,
+  res: Response
+) => {
   try {
     const { id } = req.params;
 
@@ -341,7 +357,10 @@ export const deleteOrganizer = async (req: Request<{ id: string }>, res: Respons
   }
 };
 
-export const getOrganizerStats = async (req: Request<{ id: string }>, res: Response) => {
+export const getOrganizerStats = async (
+  req: Request<{ id: string }>,
+  res: Response
+) => {
   try {
     const { id } = req.params;
 

@@ -6,11 +6,6 @@ export const getMe = async (req: any, res: Response) => {
     res.json(user);
 };
 
-
-
-
-
-
 export const updateMe = async (req: any, res: Response) => {
     const { name } = req.body;
 
