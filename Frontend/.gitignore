@@ -11,6 +11,7 @@ dist
 dist-ssr
 .env
 *.local
+.vite
 
 .vscode/*
 !.vscode/extensions.json
