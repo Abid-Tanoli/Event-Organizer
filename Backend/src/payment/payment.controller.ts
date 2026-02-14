@@ -12,10 +12,7 @@ interface VerifyPaymentInput {
   paymentIntentId: string;
 }
 
-export const createPaymentIntent = async (
-  req: Request<{}, {}, CreatePaymentIntentInput>,
-  res: Response
-) => {
+export const createPaymentIntent = async (req: any, res: any) => {
   try {
     const { ticketId, amount } = req.body;
 
@@ -68,10 +65,7 @@ export const createPaymentIntent = async (
   }
 };
 
-export const verifyPayment = async (
-  req: Request<{}, {}, VerifyPaymentInput>,
-  res: Response
-) => {
+export const verifyPayment = async (req: any, res: any) => {
   try {
     const { ticketId, paymentIntentId } = req.body;
 
@@ -119,10 +113,7 @@ export const handleWebhook = async (req: any, res: any) => {
   }
 };
 
-export const processRefund = async (
-  req: Request<{ ticketId: string }>,
-  res: Response
-) => {
+export const processRefund = async (req: any, res: any) => {
   try {
     const { ticketId } = req.params;
 
@@ -174,10 +165,7 @@ export const processRefund = async (
   }
 };
 
-export const getPaymentHistory = async (
-  req: Request<{ userId: string }>,
-  res: Response
-) => {
+export const getPaymentHistory = async (req: any, res: any) => {
   try {
     const { userId } = req.params;
     const { page = 1, limit = 10 } = req.query;
@@ -227,10 +215,7 @@ export const getPaymentHistory = async (
   }
 };
 
-export const getOrganizerEarnings = async (
-  req: Request<{ organizerId: string }>,
-  res: Response
-) => {
+export const getOrganizerEarnings = async (req: any, res: any) => {
   try {
     const { organizerId } = req.params;
     const { startDate, endDate } = req.query;
