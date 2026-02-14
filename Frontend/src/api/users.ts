@@ -1,6 +1,4 @@
-
 import axiosInstance from './axios';
-import { User } from '../types';
 
 export const usersAPI = {
   getAll: async () => {
