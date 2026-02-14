@@ -7,7 +7,7 @@ import { registerSchema, loginSchema } from "./auth.schema";
 
 const router: ExpressRouter = Router();
 
-router.post("/register", validate(registerSchema), register);
-router.post("/login", validate(loginSchema), login);
+router.post("/register", validate(registerSchema), register as any);
+router.post("/login", validate(loginSchema), login as any);
 
 export default router;

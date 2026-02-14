@@ -4,12 +4,12 @@ import { createAdminController, getAdminsController, deleteAdminController } fro
 const router = Router();
 
 // Create new admin
-router.post("/create", createAdminController);
+router.post("/create", createAdminController as any);
 
 // Get all admins
-router.get("/all", getAdminsController);
+router.get("/all", getAdminsController as any);
 
 // Delete admin
-router.delete("/:id", deleteAdminController);
+router.delete("/:id", deleteAdminController as any);
 
 export default router;

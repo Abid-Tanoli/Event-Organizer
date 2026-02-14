@@ -7,8 +7,8 @@ import { updateUserSchema } from "./user.schema";
 
 const router: Router = Router();
 
-router.get("/me", protect, getMe);
-router.put("/me", protect, validate(updateUserSchema), updateMe);
-router.get("/", protect, allowRoles("admin"), getAllUsers);
+router.get("/me", protect, getMe as any);
+router.put("/me", protect, validate(updateUserSchema), updateMe as any);
+router.get("/", protect, allowRoles("admin"), getAllUsers as any);
 
 export default router;

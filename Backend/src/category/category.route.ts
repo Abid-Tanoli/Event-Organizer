@@ -13,24 +13,24 @@ router.post(
   protect,
   allowRoles("admin"),
   validate(categorySchema),
-  createCategory
+  createCategory as any
 );
 
-router.get("/", protect, getCategories);
+router.get("/", protect, getCategories as any);
 
 router.put(
   "/:id",
   protect,
   allowRoles("admin"),
   validate(categorySchema),
-  updateCategory
+  updateCategory as any
 );
 
 router.delete(
   "/:id",
   protect,
   allowRoles("admin"),
-  deleteCategory
+  deleteCategory as any
 );
 
 export default router;

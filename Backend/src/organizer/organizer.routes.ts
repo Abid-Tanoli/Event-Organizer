@@ -13,14 +13,14 @@ import {
 
 const router: Router = Router();
 
-router.get("/approved", getApprovedOrganizers);
-router.get("/get/:id", getOrganizerById);
-router.post("/create", createOrganizer);
-router.get("/user/:userId", getOrganizerByUserId);
-router.get("/stats/:id", getOrganizerStats);
-router.put("/update/:id", updateOrganizer);
-router.get("/all", getAllOrganizers);
-router.put("/status/:id", updateOrganizerStatus);
-router.delete("/delete/:id", deleteOrganizer);
+router.get("/approved", getApprovedOrganizers as any);
+router.get("/get/:id", getOrganizerById as any);
+router.post("/create", createOrganizer as any);
+router.get("/user/:userId", getOrganizerByUserId as any);
+router.get("/stats/:id", getOrganizerStats as any);
+router.put("/update/:id", updateOrganizer as any);
+router.get("/all", getAllOrganizers as any);
+router.put("/status/:id", updateOrganizerStatus as any);
+router.delete("/delete/:id", deleteOrganizer as any);
 
 export default router;
