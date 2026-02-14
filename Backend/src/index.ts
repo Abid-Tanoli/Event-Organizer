@@ -20,7 +20,9 @@ const app: Application = express();
 const PORT: number = Number(process.env.PORT) || 5000;
 
 app.use(cors({
-  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : ['http://localhost:3000'],
+  origin: process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',')
+    : ['http://localhost:3000', 'https://event-booking-frontend-five.vercel.app'],
   credentials: true
 }));
 
