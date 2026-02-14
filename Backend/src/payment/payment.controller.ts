@@ -108,7 +108,7 @@ export const verifyPayment = async (
   }
 };
 
-export const handleWebhook = async (_req: Request, res: Response) => {
+export const handleWebhook = async (req: any, res: any) => {
   try {
     return res.status(200).json({ received: true });
   } catch (error) {
