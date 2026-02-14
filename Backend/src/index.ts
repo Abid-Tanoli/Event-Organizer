@@ -37,6 +37,17 @@ app.use("/api/tickets", ticketRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/admins", adminRoutes);
 
+app.get("/", (_req: Request, res: Response) => {
+  res.status(200).json({
+    success: true,
+    message: "Welcome to EventHub API 🚀",
+    endpoints: {
+      health: "/health",
+      api: "/api"
+    }
+  });
+});
+
 app.get("/health", (_req: Request, res: Response) => {
   res.status(200).json({
     success: true,
