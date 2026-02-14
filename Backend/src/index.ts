@@ -20,7 +20,7 @@ const app: Application = express();
 const PORT: number = Number(process.env.PORT) || 5000;
 
 app.use(cors({
-  origin: ['http://localhost:3000'],
+  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : ['http://localhost:3000'],
   credentials: true
 }));
 
@@ -77,6 +77,12 @@ const startServer = async (): Promise<void> => {
   }
 };
 
-startServer();
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  startServer();
+} else {
+  // For Vercel, just connect to DB
+  connectDB().catch(err => console.error("❌ DB connection failed:", err));
+}
 
 export default app;
