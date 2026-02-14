@@ -5,14 +5,37 @@ import { Organizer } from '../../types';
 import Button from '../../components/common/Button';
 import Modal from '../../components/common/Modal';
 import toast from 'react-hot-toast';
-import { Check, X, Trash2 } from 'lucide-react';
+import { Check, X, Trash2, Plus } from 'lucide-react';
+
+interface CreateOrganizerForm {
+  organizationName: string;
+  description: string;
+  contactEmail: string;
+  contactPhone: string;
+  city: string;
+  country: string;
+  postalCode: string;
+  addressLine: string;
+}
 
 const OrganizersManagement: React.FC = () => {
   const [organizers, setOrganizers] = useState<Organizer[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrganizer, setSelectedOrganizer] = useState<Organizer | null>(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
+
+  const [newOrganizer, setNewOrganizer] = useState<CreateOrganizerForm>({
+    organizationName: '',
+    description: '',
+    contactEmail: '',
+    contactPhone: '',
+    city: '',
+    country: '',
+    postalCode: '',
+    addressLine: '',
+  });
 
   useEffect(() => {
     fetchOrganizers();
@@ -23,26 +46,26 @@ const OrganizersManagement: React.FC = () => {
     try {
       const response = await organizersAPI.getAll();
       setOrganizers(response.data?.organizers || []);
-    } catch (error) {
+    } catch {
       toast.error('Failed to fetch organizers');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleApprove = async (organizerId: string) => {
+  const handleApprove = async (id: string) => {
     try {
-      await organizersAPI.updateStatus(organizerId, { status: 'approved' });
-      toast.success('Organizer approved successfully');
+      await organizersAPI.updateStatus(id, { status: 'approved' });
+      toast.success('Organizer approved');
       fetchOrganizers();
-    } catch (error) {
-      toast.error('Failed to approve organizer');
+    } catch {
+      toast.error('Approval failed');
     }
   };
 
   const handleReject = async () => {
     if (!selectedOrganizer || !rejectionReason) {
-      toast.error('Please provide a rejection reason');
+      toast.error('Provide rejection reason');
       return;
     }
 
@@ -51,25 +74,88 @@ const OrganizersManagement: React.FC = () => {
         status: 'rejected',
         rejectionReason,
       });
+
       toast.success('Organizer rejected');
-      setShowModal(false);
+      setShowRejectModal(false);
       setRejectionReason('');
       setSelectedOrganizer(null);
       fetchOrganizers();
-    } catch (error) {
-      toast.error('Failed to reject organizer');
+    } catch {
+      toast.error('Rejection failed');
     }
   };
 
-  const handleDelete = async (organizerId: string) => {
-    if (!window.confirm('Are you sure you want to delete this organizer?')) return;
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Delete this organizer?')) return;
 
     try {
-      await organizersAPI.delete(organizerId);
-      toast.success('Organizer deleted successfully');
+      await organizersAPI.delete(id);
+      toast.success('Deleted successfully');
       fetchOrganizers();
-    } catch (error) {
-      toast.error('Failed to delete organizer');
+    } catch {
+      toast.error('Delete failed');
+    }
+  };
+
+  const handleCreateOrganizer = async () => {
+    const {
+      organizationName,
+      description,
+      contactEmail,
+      contactPhone,
+      city,
+      country,
+      postalCode,
+      addressLine,
+    } = newOrganizer;
+
+    if (
+      !organizationName ||
+      !description ||
+      !contactEmail ||
+      !contactPhone ||
+      !city ||
+      !country ||
+      !postalCode ||
+      !addressLine
+    ) {
+      toast.error('Fill all fields');
+      return;
+    }
+
+    try {
+      await organizersAPI.create({
+        user: "698dbcc4857ee2791536c531", // replace later with real user
+        organizationName,
+        description,
+        contactEmail,
+        contactPhone,
+        address: {
+          country,
+          city,
+          postalCode,
+          addressLine,
+        },
+        status: 'pending',
+      });
+
+      toast.success('Organizer created');
+      setShowCreateModal(false);
+
+      setNewOrganizer({
+        organizationName: '',
+        description: '',
+        contactEmail: '',
+        contactPhone: '',
+        city: '',
+        country: '',
+        postalCode: '',
+        addressLine: '',
+      });
+
+      fetchOrganizers();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Create failed');
     }
   };
 
@@ -78,140 +164,127 @@ const OrganizersManagement: React.FC = () => {
       <Sidebar />
 
       <div className="flex-1 p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Organizers Management</h1>
+        <div className="flex justify-between mb-8">
+          <h1 className="text-3xl font-bold">Organizers Management</h1>
+          <Button onClick={() => setShowCreateModal(true)} className="flex gap-2">
+            <Plus className="w-4 h-4" /> Create Organizer
+          </Button>
+        </div>
 
         {loading ? (
           <div>Loading...</div>
         ) : (
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Organization
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Contact
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Events
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {organizers.map((organizer) => (
-                    <tr key={organizer._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <div className="font-medium text-gray-900">
-                          {organizer.organizationName}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {organizer.address.city}, {organizer.address.country}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        <div>{organizer.contactEmail}</div>
-                        <div className="text-gray-500">{organizer.contactPhone}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            organizer.status === 'approved'
-                              ? 'bg-green-100 text-green-800'
-                              : organizer.status === 'pending'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}
-                        >
-                          {organizer.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {organizer.totalEvents}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          {organizer.status === 'pending' && (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="success"
-                                onClick={() => handleApprove(organizer._id)}
-                              >
-                                <Check className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="danger"
-                                onClick={() => {
-                                  setSelectedOrganizer(organizer);
-                                  setShowModal(true);
-                                }}
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </>
-                          )}
-                          <Button
-                            size="sm"
-                            variant="danger"
-                            onClick={() => handleDelete(organizer._id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
+            <table className="w-full">
+              <tbody>
+                {organizers.map((org) => (
+                  <tr key={org._id} className="border-b">
+                    <td className="p-4">{org.organizationName}</td>
+                    <td className="p-4">{org.contactEmail}</td>
+                    <td className="p-4">{org.status}</td>
+                    <td className="p-4">{org.totalEvents}</td>
+                    <td className="p-4 flex gap-2">
+                      {org.status === 'pending' && (
+                        <>
+                          <Button onClick={() => handleApprove(org._id)}>
+                            <Check className="w-4 h-4" />
                           </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                          <Button
+                            onClick={() => {
+                              setSelectedOrganizer(org);
+                              setShowRejectModal(true);
+                            }}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </>
+                      )}
+                      <Button onClick={() => handleDelete(org._id)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
 
+      {/* Reject Modal */}
       <Modal
-        isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setRejectionReason('');
-          setSelectedOrganizer(null);
-        }}
+        isOpen={showRejectModal}
+        onClose={() => setShowRejectModal(false)}
         title="Reject Organizer"
       >
+        <textarea
+          value={rejectionReason}
+          onChange={(e) => setRejectionReason(e.target.value)}
+          className="w-full px-4 py-2 border rounded-lg"
+          placeholder="Enter rejection reason..."
+        />
+        <div className="flex gap-2 mt-4">
+          <Button onClick={handleReject}>Reject</Button>
+          <Button onClick={() => setShowRejectModal(false)}>Cancel</Button>
+        </div>
+      </Modal>
+
+      {/* Create Organizer Modal */}
+      <Modal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        title="Create Organizer"
+      >
         <div className="space-y-4">
-          <p className="text-gray-600">
-            Please provide a reason for rejecting this organizer:
-          </p>
-          <textarea
-            value={rejectionReason}
-            onChange={(e) => setRejectionReason(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none h-32"
-            placeholder="Enter rejection reason..."
+          <input type="text" placeholder="Organization Name"
+            value={newOrganizer.organizationName}
+            onChange={(e) => setNewOrganizer({ ...newOrganizer, organizationName: e.target.value })}
+            className="w-full px-4 py-2 border rounded-lg"
           />
-          <div className="flex gap-2">
-            <Button variant="danger" onClick={handleReject} className="flex-1">
-              Reject Organizer
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setShowModal(false);
-                setRejectionReason('');
-                setSelectedOrganizer(null);
-              }}
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-          </div>
+
+          <input type="text" placeholder="Description"
+            value={newOrganizer.description}
+            onChange={(e) => setNewOrganizer({ ...newOrganizer, description: e.target.value })}
+            className="w-full px-4 py-2 border rounded-lg"
+          />
+
+          <input type="email" placeholder="Contact Email"
+            value={newOrganizer.contactEmail}
+            onChange={(e) => setNewOrganizer({ ...newOrganizer, contactEmail: e.target.value })}
+            className="w-full px-4 py-2 border rounded-lg"
+          />
+
+          <input type="text" placeholder="Contact Phone"
+            value={newOrganizer.contactPhone}
+            onChange={(e) => setNewOrganizer({ ...newOrganizer, contactPhone: e.target.value })}
+            className="w-full px-4 py-2 border rounded-lg"
+          />
+
+          <input type="text" placeholder="Country"
+            value={newOrganizer.country}
+            onChange={(e) => setNewOrganizer({ ...newOrganizer, country: e.target.value })}
+            className="w-full px-4 py-2 border rounded-lg"
+          />
+
+          <input type="text" placeholder="City"
+            value={newOrganizer.city}
+            onChange={(e) => setNewOrganizer({ ...newOrganizer, city: e.target.value })}
+            className="w-full px-4 py-2 border rounded-lg"
+          />
+
+          <input type="text" placeholder="Postal Code"
+            value={newOrganizer.postalCode}
+            onChange={(e) => setNewOrganizer({ ...newOrganizer, postalCode: e.target.value })}
+            className="w-full px-4 py-2 border rounded-lg"
+          />
+
+          <input type="text" placeholder="Address Line"
+            value={newOrganizer.addressLine}
+            onChange={(e) => setNewOrganizer({ ...newOrganizer, addressLine: e.target.value })}
+            className="w-full px-4 py-2 border rounded-lg"
+          />
+
+          <Button onClick={handleCreateOrganizer}>Create Organizer</Button>
         </div>
       </Modal>
     </div>

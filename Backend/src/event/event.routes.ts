@@ -4,11 +4,9 @@ import {
   deleteEvent,
   getAllEvents,
   getEventById,
-  getEventsByOrganizer,
   getFeaturedEvents,
-  getPublicEvents,
-  incrementEventLikes,
-  incrementEventShares,
+  likeEvent,
+  shareEvent,
   toggleFeatured,
   updateEvent,
   updateEventStatus,
@@ -16,17 +14,15 @@ import {
 
 const router = Router();
 
-router.get("/public", getPublicEvents);
-router.get("/featured", getFeaturedEvents);
-router.get("/get/:id", getEventById);
-router.post("/like/:id", incrementEventLikes);
-router.post("/share/:id", incrementEventShares);
 router.post("/create", createEvent);
-router.get("/organizer/:organizerId", getEventsByOrganizer);
-router.put("/update/:id", updateEvent);
 router.get("/all", getAllEvents);
+router.get("/featured", getFeaturedEvents);
 router.put("/status/:id", updateEventStatus);
 router.put("/featured/:id", toggleFeatured);
-router.delete("/delete/:id", deleteEvent);
+router.post("/like/:id", likeEvent);
+router.post("/share/:id", shareEvent);
+router.get("/:id", getEventById);
+router.put("/:id", updateEvent);
+router.delete("/:id", deleteEvent);
 
 export default router;

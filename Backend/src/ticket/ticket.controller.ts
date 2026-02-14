@@ -83,7 +83,13 @@ export const createTicket = async (
       }
     }
 
-    const ticket = await Ticket.create(parsed.data);
+    // Generate a unique booking reference
+    const bookingReference = `EH-${Math.random().toString(36).substring(2, 11).toUpperCase()}`;
+
+    const ticket = await Ticket.create({
+      ...parsed.data,
+      bookingReference,
+    });
 
     for (const bookedTicket of parsed.data.tickets) {
       const ticketTypeIndex = event.ticketTypes.findIndex(

@@ -4,6 +4,7 @@ import { categoriesAPI } from '../../api/categories';
 import { Event, Category } from '../../types';
 import { EventCard } from '../../components/user/EventCard';
 import Loader from '../../components/common/Loader';
+import Pagination from '../../components/common/Pagination';
 import { Search } from 'lucide-react';
 
 const EventsPage: React.FC = () => {
@@ -11,13 +12,62 @@ const EventsPage: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedType, setSelectedType] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(6);
 
   useEffect(() => {
     fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, selectedCategory, selectedType]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchEvents = async () => {
+      setLoading(true);
+      try {
+        const response = await eventsAPI.getPublicEvents({
+          category: selectedCategory || undefined,
+          eventType: selectedType || undefined,
+          search: debouncedSearch || undefined,
+          page: currentPage,
+          limit,
+        });
+
+        if (isActive) {
+          const { data, totalPages: total } = response.data;
+          setEvents(Array.isArray(data) ? data : []);
+          setTotalPages(total || 1);
+        }
+      } catch (error) {
+        console.error('Failed to fetch events:', error);
+      } finally {
+        if (isActive) {
+          setLoading(false);
+        }
+      }
+    };
+
     fetchEvents();
-  }, [selectedCategory, selectedType, searchTerm]);
+
+    return () => {
+      isActive = false;
+    };
+  }, [debouncedSearch, selectedCategory, selectedType, currentPage]);
 
   const fetchCategories = async () => {
     try {
@@ -28,20 +78,11 @@ const EventsPage: React.FC = () => {
     }
   };
 
-  const fetchEvents = async () => {
-    setLoading(true);
-    try {
-      const response = await eventsAPI.getPublicEvents({
-        category: selectedCategory || undefined,
-        eventType: selectedType || undefined,
-        search: searchTerm || undefined,
-      });
-      setEvents(response.data?.events || []);
-    } catch (error) {
-      console.error('Failed to fetch events:', error);
-    } finally {
-      setLoading(false);
-    }
+
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -49,7 +90,7 @@ const EventsPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Explore Events</h1>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2">
               <div className="relative">
@@ -101,11 +142,19 @@ const EventsPage: React.FC = () => {
             <p className="text-xl text-gray-600">No events found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((event) => (
-              <EventCard key={event._id} event={event} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {events.map((event) => (
+                <EventCard key={event._id} event={event} />
+              ))}
+            </div>
+
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </>
         )}
       </div>
     </div>

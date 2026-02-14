@@ -23,7 +23,8 @@ export interface Category {
 
 export interface Organizer {
   _id: string;
-  user: User;
+  user: User | string; // ✅ FIXED
+
   organizationName: string;
   description: string;
   contactEmail: string;
@@ -57,6 +58,7 @@ export interface Organizer {
   createdAt: string;
   updatedAt: string;
 }
+
 
 export interface TicketType {
   name: string;

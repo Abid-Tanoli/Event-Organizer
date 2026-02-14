@@ -11,6 +11,7 @@
     "create-admin": "ts-node scripts/createAdmin.ts",
     "seed-categories": "ts-node scripts/seedCategories.ts",
     "seed-events": "ts-node scripts/seedEvents.ts",
+    "seed": "ts-node scripts/seed.ts",
     "seed-all": "npm run seed-categories && npm run seed-events"
   },
   "keywords": [
@@ -29,6 +30,7 @@
     "express": "^4.19.2",
     "express-async-handler": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
+    "kill-port": "^2.0.1",
     "mongoose": "^8.1.0",
     "nodemailer": "^6.9.9",
     "qrcode": "^1.5.3",
@@ -36,6 +38,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/bcryptjs": "^3.0.0",
     "@types/cookie-parser": "^1.4.6",
     "@types/cors": "^2.8.17",

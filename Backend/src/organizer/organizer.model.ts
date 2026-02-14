@@ -39,31 +39,31 @@ const organizerSchema = new mongoose.Schema<OrganizerModel>(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      
       unique: true,
       index: true,
     },
     organizationName: {
       type: String,
-      required: true,
+      
       trim: true,
       index: true,
     },
     description: {
       type: String,
-      required: true,
+      
       trim: true,
       maxlength: 2000,
     },
     contactEmail: {
       type: String,
-      required: true,
+      
       trim: true,
       lowercase: true,
     },
     contactPhone: {
       type: String,
-      required: true,
+      
       trim: true,
     },
     website: {
@@ -83,22 +83,22 @@ const organizerSchema = new mongoose.Schema<OrganizerModel>(
     address: {
       country: {
         type: String,
-        required: true,
+        
         trim: true,
       },
       city: {
         type: String,
-        required: true,
+        
         trim: true,
       },
       postalCode: {
         type: String,
-        required: true,
+        
         trim: true,
       },
       addressLine: {
         type: String,
-        required: true,
+        
         trim: true,
       },
     },

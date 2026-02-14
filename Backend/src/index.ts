@@ -12,13 +12,18 @@ import organizerRoutes from "./organizer/organizer.routes";
 import eventRoutes from "./event/event.routes";
 import ticketRoutes from "./ticket/ticket.routes";
 import paymentRoutes from "./payment/payment.routes";
+import adminRoutes from "./admin/admin.routes";
 
 dotenv.config();
 
 const app: Application = express();
 const PORT: number = Number(process.env.PORT) || 5000;
 
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000'],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(logger);
@@ -30,6 +35,7 @@ app.use("/api/organizers", organizerRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/admins", adminRoutes);
 
 app.get("/health", (_req: Request, res: Response) => {
   res.status(200).json({

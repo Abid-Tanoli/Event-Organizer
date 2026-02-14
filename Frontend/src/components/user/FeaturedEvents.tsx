@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { eventsAPI } from '../../api/events';
-import { Event } from '../../types';
-import { EventCard } from './EventCard';
-import { Loader } from '../common/Loader';
+import React, { useEffect, useState } from "react";
+import { eventsAPI } from "../../api/events";
+import { Event } from "../../types";
+import { EventCard } from "./EventCard";
+import Loader from "../common/Loader"; // default export
 
 export const FeaturedEvents: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -14,18 +14,16 @@ export const FeaturedEvents: React.FC = () => {
         const response = await eventsAPI.getFeaturedEvents();
         setEvents(response.data || []);
       } catch (error) {
-        console.error('Failed to fetch featured events:', error);
+        console.error("Failed to fetch featured events:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchEvents();
   }, []);
 
   if (loading) return <Loader />;
-
-  if (events.length === 0) return null;
+  if (!events.length) return null;
 
   return (
     <section className="py-16 bg-gradient-to-b from-blue-50 to-white">

@@ -1,66 +1,46 @@
-import axiosInstance from './axios';
-import { Event, ApiResponse, PaginatedResponse } from '../types';
+import axios from "./axios";
 
 export const eventsAPI = {
-  getPublicEvents: async (params?: {
-    category?: string;
-    eventType?: string;
-    city?: string;
-    search?: string;
-    page?: number;
-    limit?: number;
-  }): Promise<PaginatedResponse<Event>> => {
-    const response = await axiosInstance.get('/events/public', { params });
-    return response.data;
-  },
 
-  getFeaturedEvents: async (): Promise<ApiResponse<Event[]>> => {
-    const response = await axiosInstance.get('/events/featured');
-    return response.data;
-  },
+  getPublicEvents: (params?: any) =>
+    axios.get("/events/all", {
+      params: {
+        page: params?.page ?? 1,
+        limit: params?.limit ?? 6,
+        status: "approved",
+        category: params?.category,
+        eventType: params?.eventType,
+        search: params?.search,
+      },
+    }),
 
-  getEventById: async (id: string): Promise<ApiResponse<Event>> => {
-    const response = await axiosInstance.get(`/events/get/${id}`);
-    return response.data;
-  },
+  getAllEvents: (params?: any) =>
+    axios.get("/events/all", { params }),
 
-  getAllEvents: async (params?: Record<string, any>): Promise<PaginatedResponse<Event>> => {
-    const response = await axiosInstance.get('/events/all', { params });
-    return response.data;
-  },
+  getFeaturedEvents: () =>
+    axios.get("/events/featured"),
 
-  createEvent: async (data: Partial<Event>): Promise<ApiResponse<Event>> => {
-    const response = await axiosInstance.post('/events/create', data);
-    return response.data;
-  },
+  getEventById: (id: string) =>
+    axios.get(`/events/${id}`),
 
-  updateEvent: async (id: string, data: Partial<Event>): Promise<ApiResponse<Event>> => {
-    const response = await axiosInstance.put(`/events/update/${id}`, data);
-    return response.data;
-  },
+  createEvent: (data: any) =>
+    axios.post("/events/create", data),
 
-  updateEventStatus: async (id: string, data: { status: string; rejectionReason?: string }) => {
-    const response = await axiosInstance.put(`/events/status/${id}`, data);
-    return response.data;
-  },
+  updateEvent: (id: string, data: any) =>
+    axios.put(`/events/${id}`, data),
 
-  toggleFeatured: async (id: string, isFeatured: boolean) => {
-    const response = await axiosInstance.put(`/events/featured/${id}`, { isFeatured });
-    return response.data;
-  },
+  updateStatus: (id: string, data: any) =>
+    axios.put(`/events/status/${id}`, data),
 
-  deleteEvent: async (id: string) => {
-    const response = await axiosInstance.delete(`/events/delete/${id}`);
-    return response.data;
-  },
+  toggleFeatured: (id: string, isFeatured: boolean) =>
+    axios.put(`/events/featured/${id}`, { isFeatured }),
 
-  likeEvent: async (id: string) => {
-    const response = await axiosInstance.post(`/events/like/${id}`);
-    return response.data;
-  },
+  deleteEvent: (id: string) =>
+    axios.delete(`/events/${id}`),
 
-  shareEvent: async (id: string) => {
-    const response = await axiosInstance.post(`/events/share/${id}`);
-    return response.data;
-  },
+  likeEvent: (id: string) =>
+    axios.post(`/events/like/${id}`),
+
+  shareEvent: (id: string) =>
+    axios.post(`/events/share/${id}`),
 };

@@ -33,18 +33,19 @@ const AdminDashboard: React.FC = () => {
         organizersAPI.getAll(),
       ]);
 
-      // Use correct properties according to your API types
-      const events = eventsRes.events || [];
-      const totalBookings = events.reduce(
-        (sum: number, event: any) => sum + (event.bookings?.length || 0),
-        0
-      );
+      const eventsData = eventsRes.data?.data || eventsRes.data || [];
+      const events = Array.isArray(eventsData) ? eventsData : [];
+      const usersData = usersRes;
+      const organizersData = organizersRes.data?.organizers || [];
 
       setStats({
-        totalEvents: eventsRes.pagination?.total || 0,
-        totalUsers: Array.isArray(usersRes) ? usersRes.length : 0,
-        totalOrganizers: organizersRes.pagination?.total || 0,
-        totalBookings,
+        totalEvents: eventsRes.data?.data?.length || events.length || 0,
+        totalUsers: Array.isArray(usersData) ? usersData.length : 0,
+        totalOrganizers: organizersRes.data?.pagination?.total || organizersData.length || 0,
+        totalBookings: events.reduce(
+          (sum: number, event: any) => sum + (event.soldTickets || 0),
+          0
+        ),
       });
     } catch (error) {
       console.error('Failed to fetch stats:', error);
@@ -53,7 +54,7 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="flex bg-gray-50 min-h-screen">
-      <Sidebar className="h-screen sticky top-0" />
+      <Sidebar />
 
       <div className="flex-1 p-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Dashboard Overview</h1>
@@ -81,7 +82,7 @@ const AdminDashboard: React.FC = () => {
             change="+5%"
           />
           <StatsCard
-            title="Bookings"
+            title="Tickets Sold"
             value={stats.totalBookings}
             icon={Ticket}
             color="orange"

@@ -16,8 +16,8 @@ const socialMediaSchema = z.object({
 const addressSchema = z.object({
   country: z.string().trim().min(1, "Country is required"),
   city: z.string().trim().min(1, "City is required"),
-  postalCode: z.string().trim().min(1, "Postal code is required"),
-  addressLine: z.string().trim().min(1, "Address line is required"),
+  postalCode: z.string().trim(),
+  addressLine: z.string().trim(),
 });
 
 const bankDetailsSchema = z.object({
@@ -29,8 +29,8 @@ const bankDetailsSchema = z.object({
 
 export const createOrganizerSchema = z.object({
   user: objectIdSchema,
-  organizationName: z.string().trim().min(3, "Organization name must be at least 3 characters").max(100),
-  description: z.string().trim().min(50, "Description must be at least 50 characters").max(2000),
+  organizationName: z.string().trim(),
+  description: z.string().trim(),
   contactEmail: z.string().email("Invalid email address").trim().toLowerCase(),
   contactPhone: z.string().trim().min(10, "Phone number must be at least 10 digits"),
   website: z.string().url().optional().or(z.literal("")),

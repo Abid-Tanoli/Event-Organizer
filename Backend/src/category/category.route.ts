@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createCategory, getCategories } from "./category.controller";
+import { createCategory, getCategories, updateCategory, deleteCategory } from "./category.controller";
 import { validate } from "../middlewares/validate.middleware";
 import { categorySchema } from "./category.schema";
 import { protect } from "../auth/auth.middleware";
@@ -18,4 +18,20 @@ router.post(
 
 router.get("/", protect, getCategories);
 
+router.put(
+  "/:id",
+  protect,
+  allowRoles("admin"),
+  validate(categorySchema),
+  updateCategory
+);
+
+router.delete(
+  "/:id",
+  protect,
+  allowRoles("admin"),
+  deleteCategory
+);
+
 export default router;
+

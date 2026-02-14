@@ -25,14 +25,24 @@ const HomePage: React.FC = () => {
     try {
       const [featuredRes, publicRes] = await Promise.all([
         eventsAPI.getFeaturedEvents(),
-        eventsAPI.getPublicEvents({ page: currentPage, limit: eventsPerPage }),
+        eventsAPI.getPublicEvents({
+          page: currentPage,
+          limit: eventsPerPage,
+        }),
       ]);
 
-      setFeaturedEvents(featuredRes.data || []);
-      setAllEvents(publicRes.data?.events || []);
+      const featuredData = featuredRes.data?.data || featuredRes.data || [];
+      setFeaturedEvents(Array.isArray(featuredData) ? featuredData : []);
+
+      const publicData = publicRes.data?.data || [];
+      setAllEvents(Array.isArray(publicData) ? publicData : publicData.events || []);
       setTotalPages(publicRes.data?.pagination?.totalPages || 1);
-    } catch (error) {
-      console.error('Failed to fetch events:', error);
+    } catch (error: any) {
+      if (error.response) {
+        console.error('Failed to fetch events:', error.response.data);
+      } else {
+        console.error('Failed to fetch events:', error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -157,11 +167,10 @@ const HomePage: React.FC = () => {
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                          currentPage === page
+                        className={`px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === page
                             ? 'bg-blue-600 text-white'
                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
+                          }`}
                       >
                         {page}
                       </button>

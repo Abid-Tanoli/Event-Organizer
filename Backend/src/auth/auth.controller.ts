@@ -46,7 +46,7 @@ export const register = async (
       message: "Registered successfully",
       token,
       user: {
-        id: user._id,
+        _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -104,7 +104,7 @@ export const login = async (
       message: "Login successful",
       token,
       user: {
-        id: user._id,
+        _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
