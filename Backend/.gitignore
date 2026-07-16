@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-node_modules/
-
-pnpm-lock.yaml
-
-.env
-.env.local
-=======
 node_modules
 npm-debug.log*
 yarn-debug.log*
@@ -15,24 +7,12 @@ yarn-error.log*
 .env.local
 .env.development
 .env.test
->>>>>>> origin/master
 .env.production
 
 dist/
 build/
 
-<<<<<<< HEAD
-logs/
-*.log
-npm-debug.log*
-pnpm-debug.log*
-
-
-nodemon.json
-
-=======
 *.tsbuildinfo
-
 
 .DS_Store
 Thumbs.db
@@ -40,10 +20,8 @@ Thumbs.db
 logs/
 *.log
 
-
 tmp/
 temp/
 
 uploads/
->>>>>>> origin/master
 .vercel

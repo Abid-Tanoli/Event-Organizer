@@ -19,10 +19,27 @@ dotenv.config();
 const app: Application = express();
 const PORT: number = Number(process.env.PORT) || 5000;
 
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:4173',
+  'https://event-booking-frontend-iql8rphaa-abid-ali-tanolis-projects.vercel.app',
+];
+
+if (process.env.CORS_ORIGIN) {
+  allowedOrigins.push(...process.env.CORS_ORIGIN.split(','));
+}
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN
-    ? process.env.CORS_ORIGIN.split(',')
-    : ['http://localhost:3000', 'https://event-booking-frontend-five.vercel.app'],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
@@ -90,12 +107,10 @@ const startServer = async (): Promise<void> => {
   }
 };
 
-// For local development
+// For local development - start the HTTP server
 if (process.env.NODE_ENV !== 'production') {
   startServer();
-} else {
-  // For Vercel, just connect to DB
-  connectDB().catch(err => console.error("❌ DB connection failed:", err));
 }
+// For Vercel (production), the serverless function handles DB connection via api/index.ts middleware
 
 export default app;

@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import { mailConfig } from "../config/mail";
 
-const transporter = nodemailer.createTransporter(mailConfig);
+const transporter = nodemailer.createTransport(mailConfig);
 
 export interface EmailOptions {
   to: string;

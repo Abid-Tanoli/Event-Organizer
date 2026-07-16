@@ -38,13 +38,13 @@ const seed = async () => {
                 name: "Organizer One",
                 email: "organizer1@example.com",
                 password: hashedPassword,
-                role: "user",
+                role: "organizer",
             },
             {
                 name: "Organizer Two",
                 email: "organizer2@example.com",
                 password: hashedPassword,
-                role: "user",
+                role: "organizer",
             },
             {
                 name: "John Doe",

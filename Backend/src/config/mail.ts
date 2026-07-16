@@ -1,4 +1,3 @@
-import nodemailer from "nodemailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 
 const smtpConfig: SMTPTransport.Options = {

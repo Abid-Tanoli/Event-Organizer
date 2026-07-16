@@ -16,7 +16,8 @@ router.post(
   createCategory as any
 );
 
-router.get("/", protect, getCategories as any);
+// Public - no auth required
+router.get("/", getCategories as any);
 
 router.put(
   "/:id",

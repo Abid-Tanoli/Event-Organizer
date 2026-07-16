@@ -7,6 +7,7 @@ export interface ITicketType {
   price: number;
   quantity: number;
   soldCount?: number;
+  maxPerOrder?: number;
 }
 
 export interface IVenue {
@@ -50,6 +51,7 @@ export interface IEvent extends Document {
   status: "draft" | "pending" | "approved" | "rejected" | "cancelled" | "completed";
   isFeatured: boolean;
   isPublished: boolean;
+  isSoldOut: boolean;
   views: number;
   likes: number;
   sharesCount: number;
@@ -63,6 +65,7 @@ const TicketTypeSchema = new Schema<ITicketType>(
     price: { type: Number, required: true },
     quantity: { type: Number, required: true },
     soldCount: { type: Number, default: 0 },
+    maxPerOrder: { type: Number, default: 10 },
   },
   { _id: false }
 );
@@ -120,8 +123,9 @@ const EventSchema = new Schema<IEvent>(
       enum: ["draft", "pending", "approved", "rejected", "cancelled", "completed"],
       default: "draft",
     },
-    isFeatured: { type: Boolean, default: false },
-    isPublished: { type: Boolean, default: false },
+  isFeatured: { type: Boolean, default: false },
+  isPublished: { type: Boolean, default: false },
+  isSoldOut: { type: Boolean, default: false },
     views: { type: Number, default: 0 },
     likes: { type: Number, default: 0 },
     sharesCount: { type: Number, default: 0 },

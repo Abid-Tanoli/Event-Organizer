@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { User } from "../user/user.model";
+import { Admin } from "../admin/admin.schema";
 
 export const register = async (
   req: Request,
@@ -114,6 +115,62 @@ export const login = async (
     return res.status(500).json({
       success: false,
       message: "Login failed",
+      error: error.message,
+    });
+  }
+};
+
+export const adminLogin = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { email, password } = req.body;
+
+    const admin = await Admin.findOne({ email });
+    if (!admin) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({
+        success: false,
+        message: "JWT_SECRET not configured",
+      });
+    }
+
+    const token = jwt.sign(
+      { id: admin._id, role: "admin" },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Admin login successful",
+      token,
+      user: {
+        _id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: "admin",
+      },
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: "Admin login failed",
       error: error.message,
     });
   }

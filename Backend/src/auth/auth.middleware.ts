@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
 export const protect = (req: any, res: Response, next: NextFunction) => {
@@ -14,6 +14,6 @@ export const protect = (req: any, res: Response, next: NextFunction) => {
     req.user = decoded; 
     next();
   } catch {
-    res.status(401).json({ message: "Invalid token" });
+    return res.status(401).json({ message: "Invalid token" });
   }
 };

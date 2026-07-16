@@ -12,7 +12,7 @@ import {
   checkInSchema,
 } from "./ticket.schema";
 import { Ticket } from "./ticket.model";
-import { Event } from "../event/event.model";
+import { Event, ITicketType } from "../event/event.schema";
 
 export const createTicket = async (
   req: Request<{}, {}, CreateTicketInput>,
@@ -56,8 +56,8 @@ export const createTicket = async (
     }
 
     for (const requestedTicket of parsed.data.tickets) {
-      const eventTicketType = event.ticketTypes.find(
-        (tt) => tt.name === requestedTicket.ticketType
+      const eventTicketType = (event.ticketTypes as ITicketType[]).find(
+        (tt: ITicketType) => tt.name === requestedTicket.ticketType
       );
 
       if (!eventTicketType) {
@@ -67,7 +67,7 @@ export const createTicket = async (
         });
       }
 
-      const available = eventTicketType.quantity - eventTicketType.soldCount;
+      const available = eventTicketType.quantity - (eventTicketType.soldCount || 0);
       if (requestedTicket.quantity > available) {
         return res.status(400).json({
           success: false,
@@ -75,10 +75,11 @@ export const createTicket = async (
         });
       }
 
-      if (requestedTicket.quantity > eventTicketType.maxPerOrder) {
+      const maxPerOrder = eventTicketType.maxPerOrder || 10;
+      if (requestedTicket.quantity > maxPerOrder) {
         return res.status(400).json({
           success: false,
-          message: `Maximum ${eventTicketType.maxPerOrder} tickets allowed per order for ${requestedTicket.ticketType}`,
+          message: `Maximum ${maxPerOrder} tickets allowed per order for ${requestedTicket.ticketType}`,
         });
       }
     }
@@ -92,11 +93,11 @@ export const createTicket = async (
     });
 
     for (const bookedTicket of parsed.data.tickets) {
-      const ticketTypeIndex = event.ticketTypes.findIndex(
-        (tt) => tt.name === bookedTicket.ticketType
+      const ticketTypeIndex = (event.ticketTypes as ITicketType[]).findIndex(
+        (tt: ITicketType) => tt.name === bookedTicket.ticketType
       );
       if (ticketTypeIndex !== -1) {
-        event.ticketTypes[ticketTypeIndex].soldCount += bookedTicket.quantity;
+        event.ticketTypes[ticketTypeIndex].soldCount! += bookedTicket.quantity;
       }
     }
 
@@ -448,11 +449,11 @@ export const cancelTicket = async (
       );
 
       for (const cancelledTicket of ticket.tickets) {
-        const ticketTypeIndex = event.ticketTypes.findIndex(
-          (tt) => tt.name === cancelledTicket.ticketType
+        const ticketTypeIndex = (event.ticketTypes as ITicketType[]).findIndex(
+          (tt: ITicketType) => tt.name === cancelledTicket.ticketType
         );
         if (ticketTypeIndex !== -1) {
-          event.ticketTypes[ticketTypeIndex].soldCount -= cancelledTicket.quantity;
+          event.ticketTypes[ticketTypeIndex].soldCount! -= cancelledTicket.quantity;
         }
       }
 

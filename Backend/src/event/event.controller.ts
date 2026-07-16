@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
-import { Event } from "./event.model";
+import { Event } from "./event.schema";
 import { Organizer } from "../organizer/organizer.model";
 
 export const createEvent = async (req: Request, res: Response) => {

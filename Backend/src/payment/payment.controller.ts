@@ -1,16 +1,6 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { Types } from "mongoose";
 import { Ticket } from "../ticket/ticket.model";
-
-interface CreatePaymentIntentInput {
-  ticketId: Types.ObjectId;
-  amount: number;
-}
-
-interface VerifyPaymentInput {
-  ticketId: Types.ObjectId;
-  paymentIntentId: string;
-}
 
 export const createPaymentIntent = async (req: any, res: any) => {
   try {
@@ -102,7 +92,7 @@ export const verifyPayment = async (req: any, res: any) => {
   }
 };
 
-export const handleWebhook = async (req: any, res: any) => {
+export const handleWebhook = async (_req: any, res: any) => {
   try {
     return res.status(200).json({ received: true });
   } catch (error) {
