@@ -19,28 +19,33 @@ dotenv.config();
 const app: Application = express();
 const PORT: number = Number(process.env.PORT) || 5000;
 
-const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'http://localhost:5173',
-  'http://localhost:5174',
-  'http://localhost:4173',
-  'https://event-booking-frontend-iql8rphaa-abid-ali-tanolis-projects.vercel.app',
+const localOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:4173",
 ];
 
-if (process.env.CORS_ORIGIN) {
-  allowedOrigins.push(...process.env.CORS_ORIGIN.split(','));
-}
+const configuredOrigins = (process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const allowedOrigins =
+  process.env.NODE_ENV === "production"
+    ? configuredOrigins
+    : [...localOrigins, ...configuredOrigins];
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true
+  credentials: true,
 }));
 
 app.use(express.json());
@@ -59,19 +64,23 @@ app.use("/api/admins", adminRoutes);
 app.get("/", (_req: Request, res: Response) => {
   res.status(200).json({
     success: true,
-    message: "Welcome to EventHub API 🚀",
-    endpoints: {
-      health: "/health",
-      api: "/api"
-    }
+    message: "Welcome to EventHub API",
+    data: {
+      endpoints: {
+        health: "/health",
+        api: "/api",
+      },
+    },
   });
 });
 
 app.get("/health", (_req: Request, res: Response) => {
   res.status(200).json({
     success: true,
-    message: "Server is running ✅",
-    time: new Date().toISOString(),
+    message: "Server is running",
+    data: {
+      time: new Date().toISOString(),
+    },
   });
 });
 
@@ -83,7 +92,7 @@ app.use((_req: Request, res: Response) => {
 });
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error("❌ Error:", err.message);
+  console.error("Error:", err.message);
   res.status(500).json({
     success: false,
     message: "Internal server error",
@@ -98,19 +107,17 @@ const startServer = async (): Promise<void> => {
     await connectDB();
 
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`🩺 Health: http://localhost:${PORT}/health`);
+      console.log(`Server running on port ${PORT}`);
+      console.log(`Health: http://localhost:${PORT}/health`);
     });
   } catch (error) {
-    console.error("❌ Server start failed:", error);
+    console.error("Server start failed:", error);
     process.exit(1);
   }
 };
 
-// For local development - start the HTTP server
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   startServer();
 }
-// For Vercel (production), the serverless function handles DB connection via api/index.ts middleware
 
 export default app;

@@ -76,10 +76,16 @@ export const getAllEvents = async (req: Request, res: Response) => {
 
     return res.json({
       success: true,
-      data: events,
-      total,
-      page: pageNum,
-      totalPages,
+      message: "Events fetched successfully",
+      data: {
+        events,
+        pagination: {
+          total,
+          page: pageNum,
+          limit: limitNum,
+          totalPages,
+        },
+      },
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Server error" });
@@ -104,7 +110,7 @@ export const getEventById = async (req: Request<{ id: string }>, res: Response) 
 
     await Event.findByIdAndUpdate(id, { $inc: { views: 1 } });
 
-    return res.json({ success: true, data: event });
+    return res.json({ success: true, message: "Event fetched successfully", data: event });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Server error" });
   }
@@ -204,7 +210,7 @@ export const getFeaturedEvents = async (_req: Request, res: Response) => {
       .populate("organizer", "organizationName")
       .populate("category", "name");
 
-    return res.json({ success: true, data: events });
+    return res.json({ success: true, message: "Featured events fetched successfully", data: events });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Server error" });
   }
@@ -218,7 +224,7 @@ export const likeEvent = async (req: Request<{ id: string }>, res: Response) => 
     const event = await Event.findByIdAndUpdate(id, { $inc: { likes: 1 } }, { new: true });
     if (!event) return res.status(404).json({ success: false, message: "Event not found" });
 
-    return res.json({ success: true, data: event });
+    return res.json({ success: true, message: "Event fetched successfully", data: event });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Server error" });
   }
@@ -232,7 +238,7 @@ export const shareEvent = async (req: Request<{ id: string }>, res: Response) =>
     const event = await Event.findByIdAndUpdate(id, { $inc: { shares: 1 } }, { new: true });
     if (!event) return res.status(404).json({ success: false, message: "Event not found" });
 
-    return res.json({ success: true, data: event });
+    return res.json({ success: true, message: "Event fetched successfully", data: event });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Server error" });
   }

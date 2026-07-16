@@ -120,7 +120,7 @@ const seed = async () => {
                 title: "Global Tech Summit 2024",
                 description: "Join industry leaders for the biggest tech conference of the year. Topics include AI, Blockchain, and Cloud Computing.",
                 shortDescription: "The biggest tech conference of the year.",
-                coverImage: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=2070",
+                coverImage: "/event-placeholder.svg",
                 venue: {
                     name: "Moscone Center",
                     address: "747 Howard St",
@@ -147,7 +147,7 @@ const seed = async () => {
                 title: "Web Dev Workshop",
                 description: "Hands-on workshop for modern web development technologies including React, Node.js, and TypeScript.",
                 shortDescription: "Learn modern web development.",
-                coverImage: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80&w=2070",
+                coverImage: "/event-placeholder.svg",
                 venue: {
                     name: "Tech Hub",
                     address: "123 Innovation Dr",
@@ -172,7 +172,7 @@ const seed = async () => {
                 title: "Startup Pitch Night",
                 description: "Watch promising startups pitch to investors. Networking opportunity afterwards.",
                 shortDescription: "Networking and startup pitches.",
-                coverImage: "https://images.unsplash.com/photo-1559223607-a43c990ed9ce?auto=format&fit=crop&q=80&w=2074",
+                coverImage: "/event-placeholder.svg",
                 venue: {
                     name: "Innovation Lofts",
                     address: "500 Startup Way",
@@ -197,7 +197,7 @@ const seed = async () => {
                 title: "AI & Future of Work",
                 description: "Panel discussion on how AI is reshaping the workplace.",
                 shortDescription: "AI impact on jobs.",
-                coverImage: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80&w=2070",
+                coverImage: "/event-placeholder.svg",
                 venue: { name: "Online", address: "Zoom", city: "Online", country: "Online" },
                 eventDate: new Date("2024-12-01"),
                 eventTime: "14:00",
@@ -220,7 +220,7 @@ const seed = async () => {
                 title: "Modern Art Exhibition",
                 description: "Showcasing contemporary artists from around the globe.",
                 shortDescription: "Contemporary art showcase.",
-                coverImage: "https://images.unsplash.com/photo-1501084817091-a4f3d1d19e07?auto=format&fit=crop&q=80&w=2070",
+                coverImage: "/event-placeholder.svg",
                 venue: {
                     name: "City Gallery",
                     address: "10 Art Pl",
@@ -247,7 +247,7 @@ const seed = async () => {
                 title: "Jazz in the Park",
                 description: "An evening of smooth jazz under the stars.",
                 shortDescription: "Outdoor jazz concert.",
-                coverImage: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?auto=format&fit=crop&q=80&w=2070",
+                coverImage: "/event-placeholder.svg",
                 venue: {
                     name: "Hyde Park",
                     address: "Hyde Park",
@@ -272,7 +272,7 @@ const seed = async () => {
                 title: "Pottery Workshop",
                 description: "Learn the basics of pottery and make your own mug.",
                 shortDescription: "DIY Pottery class.",
-                coverImage: "https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&q=80&w=2070",
+                coverImage: "/event-placeholder.svg",
                 venue: {
                     name: "Creative Studio",
                     address: "456 Art Lane",
@@ -297,7 +297,7 @@ const seed = async () => {
                 title: "Virtual Museum Tour",
                 description: "Guided virtual tour of the world's most famous museums.",
                 shortDescription: "Explore museums from home.",
-                coverImage: "https://images.unsplash.com/photo-1566127444979-b3d2b654e3d7?auto=format&fit=crop&q=80&w=2070",
+                coverImage: "/event-placeholder.svg",
                 venue: { name: "Online", address: "Web", city: "Online", country: "Online" },
                 eventDate: new Date("2024-11-20"),
                 eventTime: "15:00",

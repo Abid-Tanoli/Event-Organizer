@@ -94,7 +94,7 @@ export const verifyPayment = async (req: any, res: any) => {
 
 export const handleWebhook = async (_req: any, res: any) => {
   try {
-    return res.status(200).json({ received: true });
+    return res.status(200).json({ success: true, message: "Webhook received", data: { received: true } });
   } catch (error) {
     return res.status(400).json({
       success: false,

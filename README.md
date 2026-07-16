@@ -22,26 +22,27 @@ Event-Organizer/
 │   │   └── middlewares/  # Auth, role, validation, upload
 │   ├── .env.example
 │   └── package.json
-├── Frontend-User/        # Public user app (React + Vite + TypeScript)
-│   ├── src/
-│   │   ├── api/          # API service files (axios)
-│   │   ├── pages/
-│   │   │   ├── user/     # Home, Events, EventDetails, MyBookings
-│   │   │   └── auth/     # Login, Register
-│   │   ├── components/   # Reusable components
-│   │   └── store/        # Zustand auth store
-│   ├── .env.example
-│   └── package.json
-├── Frontend-Admin/       # Admin dashboard app (React + Vite + TypeScript)
-│   ├── src/
-│   │   ├── api/          # API service files (axios)
-│   │   ├── pages/
-│   │   │   ├── admin/    # Dashboard, Events, Users, Organizers, Categories, Bookings
-│   │   │   └── auth/     # Admin Login
-│   │   ├── components/   # Reusable components
-│   │   └── store/        # Zustand auth store
-│   ├── .env.example
-│   └── package.json
+├── Frontend/
+│   ├── user/             # Public user app (React + Vite + TypeScript)
+│   │   ├── src/
+│   │   │   ├── api/          # API service files (axios)
+│   │   │   ├── pages/
+│   │   │   │   ├── user/     # Home, Events, EventDetails, MyBookings
+│   │   │   │   └── auth/     # Login, Register
+│   │   │   ├── components/   # Reusable components
+│   │   │   └── store/        # Zustand auth store
+│   │   ├── .env.example
+│   │   └── package.json
+│   └── admin/            # Admin dashboard app (React + Vite + TypeScript)
+│       ├── src/
+│       │   ├── api/          # API service files (axios)
+│       │   ├── pages/
+│       │   │   ├── admin/    # Dashboard, Events, Users, Organizers, Categories, Bookings
+│       │   │   └── auth/     # Admin Login
+│       │   ├── components/   # Reusable components
+│       │   └── store/        # Zustand auth store
+│       ├── .env.example
+│       └── package.json
 ```
 
 ## Prerequisites
@@ -86,11 +87,11 @@ Event-Organizer/
 
 There are two frontend apps:
 
-### Frontend-User (Public)
+### Frontend/User (Public)
 
 1. Navigate:
    ```
-   cd Frontend-User
+   cd Frontend/user
    ```
 
 2. Install:
@@ -109,11 +110,11 @@ There are two frontend apps:
    ```
    Opens on http://localhost:3000
 
-### Frontend-Admin (Dashboard)
+### Frontend/Admin (Dashboard)
 
 1. Navigate:
    ```
-   cd Frontend-Admin
+   cd Frontend/admin
    ```
 
 2. Install:
@@ -134,8 +135,8 @@ Open three terminals:
 | Terminal | Command |
 |----------|---------|
 | Backend | `cd Backend && npm run dev` |
-| Frontend-User | `cd Frontend-User && npm run dev` |
-| Frontend-Admin | `cd Frontend-Admin && npm run dev` |
+| User frontend | `cd Frontend/user && npm run dev` |
+| Admin frontend | `cd Frontend/admin && npm run dev` |
 
 ## API Endpoints
 
@@ -195,11 +196,11 @@ Open three terminals:
    ```
 6. Deploy
 
-### Frontend-User (Vercel)
+### Frontend/User (Vercel)
 
-1. Import `Frontend-User` directory in Vercel
+1. Import `Frontend/user` directory in Vercel
 2. Set Framework Preset: **Vite**
-3. Set Root Directory: `Frontend-User`
+3. Set Root Directory: `Frontend/user`
 4. Add environment variable:
    ```
    VITE_API_URL=https://your-backend.vercel.app/api
@@ -207,11 +208,11 @@ Open three terminals:
 5. The `vercel.json` already has React Router rewrites configured
 6. Deploy
 
-### Frontend-Admin (Vercel)
+### Frontend/Admin (Vercel)
 
-1. Import `Frontend-Admin` directory in Vercel
+1. Import `Frontend/admin` directory in Vercel
 2. Set Framework Preset: **Vite**
-3. Set Root Directory: `Frontend-Admin`
+3. Set Root Directory: `Frontend/admin`
 4. Add environment variable:
    ```
    VITE_API_URL=https://your-backend.vercel.app/api
@@ -243,7 +244,7 @@ Open three terminals:
 | JWT_EXPIRES_IN | Token expiry (default: 7d) |
 | CORS_ORIGIN | Comma-separated allowed origins |
 
-### Frontend (`Frontend-User/.env` and `Frontend-Admin/.env`)
+### Frontend (`Frontend/user/.env` and `Frontend/admin/.env`)
 | Variable | Description |
 |----------|-------------|
 | VITE_API_URL | Backend API base URL |

@@ -1,45 +1,41 @@
 import { Request, Response } from "express";
 import { Category } from "../category/category.model";
 
-// ------------------------ CREATE CATEGORY ------------------------
-// ------------------------ CREATE CATEGORY ------------------------
 export const createCategory = async (req: any, res: Response) => {
   try {
     const { name } = req.body;
 
-    // Check if category already exists
     const exist = await Category.findOne({ name });
     if (exist) {
-      return res.status(400).json({ message: "Category already exists" });
+      return res.status(400).json({ success: false, message: "Category already exists" });
     }
 
-    // Create category
     const category = await Category.create({ name });
 
     return res.status(201).json({
+      success: true,
       message: "Category created successfully",
-      category,
+      data: category,
     });
   } catch (error: any) {
-    return res.status(500).json({ message: "Category creation failed", error: error.message });
+    return res.status(500).json({ success: false, message: "Category creation failed" });
   }
 };
 
-// ------------------------ GET ALL CATEGORIES ------------------------
 export const getCategories = async (_req: Request, res: Response) => {
   try {
     const categories = await Category.find();
 
     return res.json({
+      success: true,
       message: "Categories fetched successfully",
-      categories,
+      data: categories,
     });
   } catch (error: any) {
-    return res.status(500).json({ message: "Failed to fetch categories", error: error.message });
+    return res.status(500).json({ success: false, message: "Failed to fetch categories" });
   }
 };
 
-// ------------------------ UPDATE CATEGORY ------------------------
 export const updateCategory = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -52,19 +48,19 @@ export const updateCategory = async (req: Request, res: Response) => {
     );
 
     if (!category) {
-      return res.status(404).json({ message: "Category not found" });
+      return res.status(404).json({ success: false, message: "Category not found" });
     }
 
     return res.json({
+      success: true,
       message: "Category updated successfully",
-      category,
+      data: category,
     });
   } catch (error: any) {
-    return res.status(500).json({ message: "Category update failed", error: error.message });
+    return res.status(500).json({ success: false, message: "Category update failed" });
   }
 };
 
-// ------------------------ DELETE CATEGORY ------------------------
 export const deleteCategory = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -72,13 +68,15 @@ export const deleteCategory = async (req: Request, res: Response) => {
     const category = await Category.findByIdAndDelete(id);
 
     if (!category) {
-      return res.status(404).json({ message: "Category not found" });
+      return res.status(404).json({ success: false, message: "Category not found" });
     }
 
     return res.json({
+      success: true,
       message: "Category deleted successfully",
+      data: null,
     });
   } catch (error: any) {
-    return res.status(500).json({ message: "Category deletion failed", error: error.message });
+    return res.status(500).json({ success: false, message: "Category deletion failed" });
   }
 };

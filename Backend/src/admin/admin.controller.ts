@@ -18,7 +18,7 @@ export const createAdminController = async (req: Request, res: Response) => {
 export const getAdminsController = async (_req: Request, res: Response) => {
   try {
     const admins = await getAllAdmins();
-    return res.json({ success: true, data: admins });
+    return res.json({ success: true, message: "Admins fetched", data: admins });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Server error", error });
   }
@@ -28,7 +28,7 @@ export const deleteAdminController = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     await deleteAdminById(id);
-    return res.json({ success: true, message: "Admin deleted" });
+    return res.json({ success: true, message: "Admin deleted", data: null });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Server error", error });
   }

@@ -4,12 +4,36 @@ import bcrypt from "bcryptjs";
 import { User } from "../user/user.model";
 import { Admin } from "../admin/admin.schema";
 
+const createAuthPayload = (entity: any, role = entity.role) => ({
+  token: jwt.sign(
+    { id: entity._id, role },
+    process.env.JWT_SECRET!,
+    { expiresIn: "7d" }
+  ),
+  user: {
+    _id: entity._id,
+    name: entity.name,
+    email: entity.email,
+    role,
+  },
+});
+
+const ensureJwtSecret = (res: Response) => {
+  if (process.env.JWT_SECRET) return true;
+
+  res.status(500).json({
+    success: false,
+    message: "JWT_SECRET not configured",
+  });
+  return false;
+};
+
 export const register = async (
   req: Request,
   res: Response
-): Promise<Response> => {
+): Promise<Response | void> => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
     const existingUser = await User.findOne({ email });
 
@@ -26,32 +50,15 @@ export const register = async (
       name,
       email,
       password: hashedPassword,
-      role: role || "user",
+      role: "user",
     });
 
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({
-        success: false,
-        message: "JWT_SECRET not configured",
-      });
-    }
-
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    if (!ensureJwtSecret(res)) return;
 
     return res.status(201).json({
       success: true,
       message: "Registered successfully",
-      token,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
+      data: createAuthPayload(user),
     });
   } catch (error: any) {
     return res.status(500).json({
@@ -65,7 +72,7 @@ export const register = async (
 export const login = async (
   req: Request,
   res: Response
-): Promise<Response> => {
+): Promise<Response | void> => {
   try {
     const { email, password } = req.body;
 
@@ -87,29 +94,12 @@ export const login = async (
       });
     }
 
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({
-        success: false,
-        message: "JWT_SECRET not configured",
-      });
-    }
-
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    if (!ensureJwtSecret(res)) return;
 
     return res.status(200).json({
       success: true,
       message: "Login successful",
-      token,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
+      data: createAuthPayload(user),
     });
   } catch (error: any) {
     return res.status(500).json({
@@ -123,7 +113,7 @@ export const login = async (
 export const adminLogin = async (
   req: Request,
   res: Response
-): Promise<Response> => {
+): Promise<Response | void> => {
   try {
     const { email, password } = req.body;
 
@@ -143,29 +133,12 @@ export const adminLogin = async (
       });
     }
 
-    if (!process.env.JWT_SECRET) {
-      return res.status(500).json({
-        success: false,
-        message: "JWT_SECRET not configured",
-      });
-    }
-
-    const token = jwt.sign(
-      { id: admin._id, role: "admin" },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    if (!ensureJwtSecret(res)) return;
 
     return res.status(200).json({
       success: true,
       message: "Admin login successful",
-      token,
-      user: {
-        _id: admin._id,
-        name: admin.name,
-        email: admin.email,
-        role: "admin",
-      },
+      data: createAuthPayload(admin, "admin"),
     });
   } catch (error: any) {
     return res.status(500).json({
