@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import Sidebar from '../../components/admin/Sidebar';
-import { categoriesAPI } from '../../api/categories';
-import { Category } from '../../types';
-import Button from '../../components/common/Button';
-import Modal from '../../components/common/Modal';
+import { categoriesAPI } from '@/api/categories';
+import { Category } from '@/types';
+import Button from '@/components/common/Button';
+import Modal from '@/components/common/Modal';
 import toast from 'react-hot-toast';
 import { Plus, Trash2, Edit2, Tags } from 'lucide-react';
 
@@ -85,12 +84,10 @@ const CategoriesManagement: React.FC = () => {
   };
 
   return (
-    <div className="flex bg-gray-50 min-h-screen">
-      <Sidebar />
-
-      <div className="flex-1 p-8">
+    <div className="bg-background min-h-screen">
+      <div className="p-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Categories Management</h1>
+          <h1 className="text-3xl font-bold text-foreground">Categories Management</h1>
           <Button
             variant="primary"
             onClick={() => {
@@ -105,43 +102,43 @@ const CategoriesManagement: React.FC = () => {
 
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading categories...</p>
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading categories...</p>
           </div>
         ) : categories.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-            <Tags className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-xl text-gray-600">No categories yet</p>
-            <p className="text-gray-400 mt-2">Create your first category to get started</p>
+          <div className="bg-card rounded-xl shadow-lg p-12 text-center">
+            <Tags className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
+            <p className="text-xl text-muted-foreground">No categories yet</p>
+            <p className="text-muted-foreground mt-2">Create your first category to get started</p>
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div className="bg-card rounded-xl shadow-lg overflow-hidden">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-muted/60">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                     Name
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                     Created At
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-border">
                 {categories.map((cat) => (
-                  <tr key={cat._id} className="hover:bg-gray-50">
+                  <tr key={cat._id} className="hover:bg-muted/50">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <Tags className="w-4 h-4 text-blue-600" />
+                        <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                          <Tags className="w-4 h-4 text-primary" />
                         </div>
-                        <span className="font-medium text-gray-900">{cat.name}</span>
+                        <span className="font-medium text-foreground">{cat.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
+                    <td className="px-6 py-4 text-sm text-muted-foreground">
                       {cat.createdAt ? new Date(cat.createdAt).toLocaleDateString() : 'N/A'}
                     </td>
                     <td className="px-6 py-4">
@@ -178,7 +175,7 @@ const CategoriesManagement: React.FC = () => {
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
               Category Name
             </label>
             <input
@@ -186,7 +183,7 @@ const CategoriesManagement: React.FC = () => {
               placeholder="Enter category name"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
               onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
             />
           </div>
@@ -217,7 +214,7 @@ const CategoriesManagement: React.FC = () => {
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-muted-foreground mb-2">
               Category Name
             </label>
             <input
@@ -225,7 +222,7 @@ const CategoriesManagement: React.FC = () => {
               placeholder="Enter category name"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+              className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
               onKeyDown={(e) => e.key === 'Enter' && handleUpdate()}
             />
           </div>

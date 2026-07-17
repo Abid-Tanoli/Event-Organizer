@@ -18,6 +18,7 @@ import { Calendar, MapPin, Share2, Heart, ArrowLeft, Globe, Mail } from 'lucide-
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/store/authStore';
+import { SERVICE_FEE_PERCENT, PAYMENT_METHOD } from '@/config/constants';
 
 const EventDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -91,11 +92,11 @@ const EventDetailsPage = () => {
           return { ticketType: name, quantity: qty, price: ticketType?.price || 0, subtotal: (ticketType?.price || 0) * qty };
         });
       const totalAmount = ticketsToBook.reduce((sum, t) => sum + t.subtotal, 0);
-      const serviceFee = totalAmount * 0.05;
+      const serviceFee = totalAmount * SERVICE_FEE_PERCENT;
       const organizerId = typeof event.organizer === 'object' ? (event.organizer as any)._id : event.organizer;
       await ticketsAPI.create({
         event: event._id, user: user._id, organizer: organizerId, tickets: ticketsToBook,
-        totalAmount, serviceFee, finalAmount: totalAmount + serviceFee, paymentMethod: 'card', attendeeInfo,
+        totalAmount, serviceFee, finalAmount: totalAmount + serviceFee, paymentMethod: PAYMENT_METHOD, attendeeInfo,
       });
       toast.success('Tickets booked!');
       setIsBookingOpen(false);
@@ -133,12 +134,12 @@ const EventDetailsPage = () => {
               <div className="flex justify-between items-end">
                 <div>
                   <div className="flex gap-2 mb-4">
-                    {event.isFeatured && <Badge variant="default" className="bg-yellow-500 text-yellow-950">Featured</Badge>}
+                    {event.isFeatured && <Badge variant="default" className="bg-primary text-primary-foreground">Featured</Badge>}
                     <Badge variant="secondary" className="capitalize">{event.eventType}</Badge>
                     <Badge variant="outline" className="border-white/30 text-white capitalize">{event.status}</Badge>
                   </div>
                   <h1 className="text-4xl md:text-5xl font-bold mb-4">{event.title}</h1>
-                  <div className="flex flex-wrap gap-6 text-gray-200">
+                  <div className="flex flex-wrap gap-6 text-white/80">
                     <div className="flex items-center gap-2"><Calendar className="w-5 h-5" /><span>{format(new Date(event.eventDate), 'EEEE, MMMM dd, yyyy')} • {event.eventTime}</span></div>
                     <div className="flex items-center gap-2"><MapPin className="w-5 h-5" /><span>{event.venue.name}, {event.venue.city}</span></div>
                   </div>
@@ -217,7 +218,7 @@ const EventDetailsPage = () => {
                         <span className="text-lg font-bold text-primary">${ticket.price}</span>
                       </div>
                       <div className="flex justify-between items-center mt-3">
-                        <span className={`text-sm ${ticket.quantity - ticket.soldCount > 0 ? 'text-green-600' : 'text-destructive'}`}>
+                        <span className={`text-sm ${ticket.quantity - ticket.soldCount > 0 ? 'text-success' : 'text-destructive'}`}>
                           {ticket.quantity - ticket.soldCount > 0 ? `${ticket.quantity - ticket.soldCount} available` : 'Sold Out'}
                         </span>
                         <div className="flex items-center gap-3">
@@ -238,16 +239,24 @@ const EventDetailsPage = () => {
                 </div>
 
                 <div className="border-t pt-4 mb-6">
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Total</span>
-                    <span className="text-2xl font-bold">${totalPrice}</span>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="font-medium">${totalPrice}</span>
+                  </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-muted-foreground">Service Fee ({Math.round(SERVICE_FEE_PERCENT * 100)}%)</span>
+                    <span className="font-medium">${(totalPrice * SERVICE_FEE_PERCENT).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-t pt-2 mt-2">
+                    <span className="text-lg font-bold">Total</span>
+                    <span className="text-2xl font-bold">${(totalPrice * (1 + SERVICE_FEE_PERCENT)).toFixed(2)}</span>
                   </div>
                 </div>
 
                 <Button className="w-full" onClick={openBooking} disabled={!hasSelectedTickets}>
                   Book Tickets
                 </Button>
-                <p className="text-center text-xs text-muted-foreground mt-4">Secure payment powered by Stripe</p>
+                <p className="text-center text-xs text-muted-foreground mt-4">Secure checkout - demo sandbox payment</p>
               </div>
             </div>
           </div>
@@ -289,9 +298,13 @@ const EventDetailsPage = () => {
                   );
                 })}
               </div>
+              <div className="flex justify-between text-sm mb-2">
+                <span className="text-muted-foreground">Service Fee ({Math.round(SERVICE_FEE_PERCENT * 100)}%)</span>
+                <span>${(totalPrice * SERVICE_FEE_PERCENT).toFixed(2)}</span>
+              </div>
               <div className="flex justify-between font-bold text-lg pt-2 border-t">
                 <span>Total</span>
-                <span>${totalPrice}</span>
+                <span>${(totalPrice * (1 + SERVICE_FEE_PERCENT)).toFixed(2)}</span>
               </div>
             </div>
 

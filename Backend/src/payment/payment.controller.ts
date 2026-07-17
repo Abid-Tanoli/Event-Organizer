@@ -1,8 +1,11 @@
 import { Response } from "express";
 import { Types } from "mongoose";
 import { Ticket } from "../ticket/ticket.model";
+import { Organizer } from "../organizer/organizer.model";
+import { AuthRequest } from "../auth/auth.middleware";
+import { CURRENCY } from "../config/constants";
 
-export const createPaymentIntent = async (req: any, res: any) => {
+export const createPaymentIntent = async (req: AuthRequest, res: Response) => {
   try {
     const { ticketId, amount } = req.body;
 
@@ -33,8 +36,16 @@ export const createPaymentIntent = async (req: any, res: any) => {
       id: `pi_mock_${Date.now()}`,
       client_secret: `pi_mock_secret_${Date.now()}`,
       amount: Math.round(amount * 100),
-      currency: "usd",
+      currency: CURRENCY,
     };
+
+    // Ownership check: users can only create payment for their own tickets
+    if (req.user!.role !== "admin" && ticket.user.toString() !== req.user!.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only pay for your own tickets",
+      });
+    }
 
     ticket.paymentIntentId = mockPaymentIntent.id;
     await ticket.save();
@@ -55,7 +66,7 @@ export const createPaymentIntent = async (req: any, res: any) => {
   }
 };
 
-export const verifyPayment = async (req: any, res: any) => {
+export const verifyPayment = async (req: AuthRequest, res: Response) => {
   try {
     const { ticketId, paymentIntentId } = req.body;
 
@@ -72,6 +83,14 @@ export const verifyPayment = async (req: any, res: any) => {
       return res.status(404).json({
         success: false,
         message: "Ticket not found",
+      });
+    }
+
+    // Ownership check: users can only verify payment for their own tickets
+    if (req.user!.role !== "admin" && ticket.user.toString() !== req.user!.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only verify payment for your own tickets",
       });
     }
 
@@ -92,7 +111,7 @@ export const verifyPayment = async (req: any, res: any) => {
   }
 };
 
-export const handleWebhook = async (_req: any, res: any) => {
+export const handleWebhook = async (_req: AuthRequest, res: Response) => {
   try {
     return res.status(200).json({ success: true, message: "Webhook received", data: { received: true } });
   } catch (error) {
@@ -103,7 +122,7 @@ export const handleWebhook = async (_req: any, res: any) => {
   }
 };
 
-export const processRefund = async (req: any, res: any) => {
+export const processRefund = async (req: AuthRequest, res: Response) => {
   try {
     const { ticketId } = req.params;
 
@@ -155,7 +174,7 @@ export const processRefund = async (req: any, res: any) => {
   }
 };
 
-export const getPaymentHistory = async (req: any, res: any) => {
+export const getPaymentHistory = async (req: AuthRequest, res: Response) => {
   try {
     const { userId } = req.params;
     const { page = 1, limit = 10 } = req.query;
@@ -164,6 +183,14 @@ export const getPaymentHistory = async (req: any, res: any) => {
       return res.status(400).json({
         success: false,
         message: "Invalid user id",
+      });
+    }
+
+    // Ownership check: users can only view their own payment history
+    if (req.user!.role !== "admin" && userId !== req.user!.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only view your own payment history",
       });
     }
 
@@ -205,7 +232,7 @@ export const getPaymentHistory = async (req: any, res: any) => {
   }
 };
 
-export const getOrganizerEarnings = async (req: any, res: any) => {
+export const getOrganizerEarnings = async (req: AuthRequest, res: Response) => {
   try {
     const { organizerId } = req.params;
     const { startDate, endDate } = req.query;
@@ -215,6 +242,17 @@ export const getOrganizerEarnings = async (req: any, res: any) => {
         success: false,
         message: "Invalid organizer id",
       });
+    }
+
+    // Ownership check: organizers can only view their own earnings
+    if (req.user!.role !== "admin") {
+      const organizer = await Organizer.findById(organizerId);
+      if (!organizer || organizer.user.toString() !== req.user!.id) {
+        return res.status(403).json({
+          success: false,
+          message: "You can only view your own earnings",
+        });
+      }
     }
 
     const query: any = {

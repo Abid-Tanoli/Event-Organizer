@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { Types } from "mongoose";
 import { ZodIssue } from "zod";
 import {
@@ -10,9 +10,11 @@ import {
   updateOrganizerStatusSchema,
 } from "./organizer.schema";
 import { Organizer } from "./organizer.model";
+import { User } from "../user/user.model";
+import { AuthRequest } from "../auth/auth.middleware";
 
 export const createOrganizer = async (
-  req: Request<{}, {}, CreateOrganizerInput>,
+  req: AuthRequest<{}, {}, CreateOrganizerInput>,
   res: Response
 ) => {
   try {
@@ -22,6 +24,14 @@ export const createOrganizer = async (
       return res.status(400).json({
         success: false,
         errors: parsed.error.issues.map((err: ZodIssue) => err.message),
+      });
+    }
+
+    // Ownership check: users can only create organizer profiles for themselves
+    if (String(parsed.data.user) !== req.user!.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only create an organizer profile for yourself",
       });
     }
 
@@ -50,7 +60,7 @@ export const createOrganizer = async (
 };
 
 export const getOrganizerById = async (
-  req: Request<{ id: string }>,
+  req: AuthRequest<{ id: string }>,
   res: Response
 ) => {
   try {
@@ -86,7 +96,7 @@ export const getOrganizerById = async (
 };
 
 export const getOrganizerByUserId = async (
-  req: Request<{ userId: string }>,
+  req: AuthRequest<{ userId: string }>,
   res: Response
 ) => {
   try {
@@ -96,6 +106,14 @@ export const getOrganizerByUserId = async (
       return res.status(400).json({
         success: false,
         message: "Invalid user id",
+      });
+    }
+
+    // Ownership check: users can only view their own organizer profile (unless admin)
+    if (req.user!.role !== "admin" && userId !== req.user!.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only view your own organizer profile",
       });
     }
 
@@ -122,7 +140,7 @@ export const getOrganizerByUserId = async (
 };
 
 export const getAllOrganizers = async (
-  req: Request,
+  req: AuthRequest,
   res: Response
 ) => {
   try {
@@ -170,7 +188,7 @@ export const getAllOrganizers = async (
 };
 
 export const getApprovedOrganizers = async (
-  req: Request,
+  req: AuthRequest,
   res: Response
 ) => {
   try {
@@ -214,7 +232,7 @@ export const getApprovedOrganizers = async (
 };
 
 export const updateOrganizer = async (
-  req: Request<{ id: string }, {}, UpdateOrganizerInput>,
+  req: AuthRequest<{ id: string }, {}, UpdateOrganizerInput>,
   res: Response
 ) => {
   try {
@@ -234,6 +252,23 @@ export const updateOrganizer = async (
         success: false,
         errors: parsed.error.issues.map((err: ZodIssue) => err.message),
       });
+    }
+
+    // Ownership check: organizers can only update their own profile (unless admin)
+    if (req.user!.role !== "admin") {
+      const existing = await Organizer.findById(id);
+      if (!existing) {
+        return res.status(404).json({
+          success: false,
+          message: "Organizer not found",
+        });
+      }
+      if (existing.user.toString() !== req.user!.id) {
+        return res.status(403).json({
+          success: false,
+          message: "You can only update your own organizer profile",
+        });
+      }
     }
 
     const updated = await Organizer.findByIdAndUpdate(
@@ -263,7 +298,7 @@ export const updateOrganizer = async (
 };
 
 export const updateOrganizerStatus = async (
-  req: Request<{ id: string }, {}, UpdateOrganizerStatusInput>,
+  req: AuthRequest<{ id: string }, {}, UpdateOrganizerStatusInput>,
   res: Response
 ) => {
   try {
@@ -290,6 +325,11 @@ export const updateOrganizerStatus = async (
     if (parsed.data.status === "approved") {
       updateData.isVerified = true;
       updateData.rejectionReason = undefined;
+      // Promote the linked user to organizer role
+      const organizer = await Organizer.findById(id);
+      if (organizer) {
+        await User.findByIdAndUpdate(organizer.user, { role: "organizer" });
+      }
     }
 
     if (parsed.data.status === "rejected" && parsed.data.rejectionReason) {
@@ -323,7 +363,7 @@ export const updateOrganizerStatus = async (
 };
 
 export const deleteOrganizer = async (
-  req: Request<{ id: string }>,
+  req: AuthRequest<{ id: string }>,
   res: Response
 ) => {
   try {
@@ -358,7 +398,7 @@ export const deleteOrganizer = async (
 };
 
 export const getOrganizerStats = async (
-  req: Request<{ id: string }>,
+  req: AuthRequest<{ id: string }>,
   res: Response
 ) => {
   try {

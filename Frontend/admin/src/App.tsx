@@ -1,14 +1,25 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { useAuthStore } from "./store/authStore";
 
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import Sidebar from "./components/admin/Sidebar";
 import Login from "./pages/auth/Login";
+import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/Dashboard";
 import EventsManagement from "./pages/admin/EventsManagement";
 import OrganizersManagement from "./pages/admin/OrganizersManagement";
 import AdminUsers from "./pages/admin/AdminUsers";
 import CategoriesManagement from "./pages/admin/CategoriesManagement";
 import AdminBookings from "./pages/admin/AdminBookings";
+
+const AdminLayout = () => (
+  <div className="flex min-h-screen bg-muted/30">
+    <Sidebar />
+    <div className="flex-1">
+      <Outlet />
+    </div>
+  </div>
+);
 
 const App = () => {
   const { isAuthenticated } = useAuthStore();
@@ -31,57 +42,25 @@ const App = () => {
             )
           }
         />
-        <Route
-          path="/admin/dashboard"
-          element={
-            <ProtectedRoute requireAdmin>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/events"
-          element={
-            <ProtectedRoute requireAdmin>
-              <EventsManagement />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/organizers"
-          element={
-            <ProtectedRoute requireAdmin>
-              <OrganizersManagement />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/users"
-          element={
-            <ProtectedRoute requireAdmin>
-              <AdminUsers />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/categories"
-          element={
-            <ProtectedRoute requireAdmin>
-              <CategoriesManagement />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/bookings"
-          element={
-            <ProtectedRoute requireAdmin>
-              <AdminBookings />
-            </ProtectedRoute>
-          }
-        />
 
-        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute requireAdmin>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="events" element={<EventsManagement />} />
+          <Route path="organizers" element={<OrganizersManagement />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="categories" element={<CategoriesManagement />} />
+          <Route path="bookings" element={<AdminBookings />} />
+        </Route>
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

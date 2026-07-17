@@ -9,8 +9,9 @@ export const validate =
                 next();
             } catch (err: any) {
                 res.status(400).json({
+                    success: false,
                     message: "Validation Error",
-                    errors: err.errors,
+                    errors: err.issues?.map((i: any) => i.message) || ["Validation failed"],
                 });
             }
         };

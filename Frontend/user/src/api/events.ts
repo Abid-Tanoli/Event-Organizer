@@ -1,4 +1,5 @@
 import axiosInstance from "./axios";
+import { Event } from "@/types";
 
 export interface ListResult<T> {
   items: T[];
@@ -16,7 +17,7 @@ const listFromResponse = <T>(response: any, key: string): ListResult<T> => ({
 });
 
 export const eventsAPI = {
-  getPublicEvents: async (params?: any) => {
+  getPublicEvents: async (params?: any): Promise<ListResult<Event>> => {
     const response = await axiosInstance.get("/events/all", {
       params: {
         page: params?.page ?? 1,
@@ -27,12 +28,12 @@ export const eventsAPI = {
         search: params?.search,
       },
     });
-    return listFromResponse(response, "events");
+    return listFromResponse<Event>(response, "events");
   },
 
-  getAllEvents: async (params?: any) => {
+  getAllEvents: async (params?: any): Promise<ListResult<Event>> => {
     const response = await axiosInstance.get("/events/all", { params });
-    return listFromResponse(response, "events");
+    return listFromResponse<Event>(response, "events");
   },
 
   getFeaturedEvents: async () => {
@@ -45,13 +46,17 @@ export const eventsAPI = {
     return response.data.data;
   },
 
-  createEvent: async (data: any) => {
-    const response = await axiosInstance.post("/events/create", data);
+  createEvent: async (data: FormData | any) => {
+    const response = await axiosInstance.post("/events/create", data, {
+      headers: data instanceof FormData ? { "Content-Type": "multipart/form-data" } : undefined,
+    });
     return response.data.data;
   },
 
-  updateEvent: async (id: string, data: any) => {
-    const response = await axiosInstance.put(`/events/${id}`, data);
+  updateEvent: async (id: string, data: FormData | any) => {
+    const response = await axiosInstance.put(`/events/${id}`, data, {
+      headers: data instanceof FormData ? { "Content-Type": "multipart/form-data" } : undefined,
+    });
     return response.data.data;
   },
 

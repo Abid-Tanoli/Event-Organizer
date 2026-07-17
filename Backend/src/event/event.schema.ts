@@ -100,7 +100,7 @@ const EventSchema = new Schema<IEvent>(
     title: { type: String, required: true },
     description: { type: String, required: true },
     shortDescription: { type: String, required: true },
-    coverImage: { type: String, required: true },
+    coverImage: { type: String, default: "" },
     images: [{ type: String }],
     venue: { type: VenueSchema, required: true },
     eventDate: { type: Date, required: true },

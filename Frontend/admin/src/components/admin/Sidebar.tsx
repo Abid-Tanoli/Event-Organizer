@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Calendar,
@@ -13,6 +13,7 @@ import {
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/authStore';
 
 const menuItems = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
@@ -25,6 +26,8 @@ const menuItems = [
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuthStore();
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -74,8 +77,8 @@ const Sidebar = () => {
           size="sm"
           className="w-full justify-start text-sidebar-foreground/80 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent"
           onClick={() => {
-            localStorage.removeItem('adminToken');
-            window.location.href = '/admin/login';
+            logout();
+            navigate('/admin/login');
           }}
         >
           <LogOut className="w-4 h-4 shrink-0" />

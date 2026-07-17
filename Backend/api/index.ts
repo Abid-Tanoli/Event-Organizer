@@ -1,24 +1,29 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import app from "../src/index";
 import { connectDB } from "../src/config/database";
-import mongoose from "mongoose";
+import app from "../src/index";
 
 let dbConnected = false;
 
-app.use(async (_req: any, res: any, next: any) => {
+const ensureDB = async (_req: any, _res: any, next: any) => {
   if (!dbConnected) {
     try {
-      if (mongoose.connection.readyState !== 1) {
-        await connectDB();
-      }
+      await connectDB();
       dbConnected = true;
     } catch (err) {
-      console.error("DB connection failed in middleware:", err);
+      console.error("DB connection failed:", err);
     }
   }
   next();
-});
+};
 
-export default app;
+const handler = async (req: any, res: any) => {
+  if (!dbConnected) {
+    await connectDB();
+    dbConnected = true;
+  }
+  return app(req, res);
+};
+
+export default handler;

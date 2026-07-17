@@ -4,6 +4,7 @@ import { useAuthStore } from "./store/authStore";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import NotFound from "./pages/NotFound";
 
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
@@ -61,7 +62,7 @@ const App = () => {
               }
             />
 
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
 

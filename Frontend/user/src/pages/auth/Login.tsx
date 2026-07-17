@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Calendar, Mail, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { SITE_NAME } from '@/config/site';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -47,7 +48,7 @@ const Login = () => {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Calendar className="w-10 h-10 text-primary" />
-            <span className="text-3xl font-bold">EventHub</span>
+            <span className="text-3xl font-bold">{SITE_NAME}</span>
           </div>
           <h2 className="text-3xl font-bold">Welcome Back</h2>
           <p className="mt-2 text-muted-foreground">Sign in to your account</p>

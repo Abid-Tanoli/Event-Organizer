@@ -3,12 +3,13 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { User } from "../user/user.model";
 import { Admin } from "../admin/admin.schema";
+import { JWT_EXPIRES_IN, BCRYPT_SALT_ROUNDS } from "../config/constants";
 
 const createAuthPayload = (entity: any, role = entity.role) => ({
   token: jwt.sign(
     { id: entity._id, role },
     process.env.JWT_SECRET!,
-    { expiresIn: "7d" }
+    { expiresIn: JWT_EXPIRES_IN as any }
   ),
   user: {
     _id: entity._id,
@@ -44,7 +45,7 @@ export const register = async (
       });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
     const user = await User.create({
       name,

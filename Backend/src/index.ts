@@ -1,6 +1,7 @@
 import express, { Application, Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import path from "path";
 
 import { connectDB } from "./config/database";
 import { logger } from "./middlewares/logger.middleware";
@@ -13,6 +14,7 @@ import eventRoutes from "./event/event.routes";
 import ticketRoutes from "./ticket/ticket.routes";
 import paymentRoutes from "./payment/payment.routes";
 import adminRoutes from "./admin/admin.routes";
+import statsRoutes from "./stats/stats.routes";
 
 dotenv.config();
 
@@ -50,6 +52,7 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use(logger);
 
 app.use("/api/auth", authRoutes);
@@ -60,6 +63,7 @@ app.use("/api/events", eventRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/admins", adminRoutes);
+app.use("/api/stats", statsRoutes);
 
 app.get("/", (_req: Request, res: Response) => {
   res.status(200).json({

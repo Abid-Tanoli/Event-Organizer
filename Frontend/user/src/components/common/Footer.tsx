@@ -1,5 +1,6 @@
 import { Calendar, Mail, Phone, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SITE_NAME, SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_ADDRESS, COPYRIGHT_YEAR } from '@/config/site';
 
 const Footer = () => {
   return (
@@ -9,7 +10,7 @@ const Footer = () => {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <Calendar className="w-7 h-7 text-primary" />
-              <span className="text-xl font-bold text-foreground">EventHub</span>
+              <span className="text-xl font-bold text-foreground">{SITE_NAME}</span>
             </div>
             <p className="text-sm text-muted-foreground">
               Your premier destination for discovering and booking amazing events.
@@ -35,15 +36,15 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold text-foreground mb-4">Contact Info</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2"><Mail className="w-4 h-4" /> support@eventhub.com</li>
-              <li className="flex items-center gap-2"><Phone className="w-4 h-4" /> +1 234 567 890</li>
-              <li className="flex items-center gap-2"><MapPin className="w-4 h-4" /> New York, NY</li>
+              <li className="flex items-center gap-2"><Mail className="w-4 h-4" /> {SUPPORT_EMAIL}</li>
+              <li className="flex items-center gap-2"><Phone className="w-4 h-4" /> {SUPPORT_PHONE}</li>
+              <li className="flex items-center gap-2"><MapPin className="w-4 h-4" /> {SUPPORT_ADDRESS}</li>
             </ul>
           </div>
         </div>
 
         <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; 2026 EventHub. All rights reserved.</p>
+          <p>&copy; {COPYRIGHT_YEAR} {SITE_NAME}. All rights reserved.</p>
         </div>
       </div>
     </footer>

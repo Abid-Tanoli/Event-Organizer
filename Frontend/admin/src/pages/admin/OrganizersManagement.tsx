@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import Sidebar from '../../components/admin/Sidebar';
-import { organizersAPI } from '../../api/organizers';
-import { usersAPI } from '../../api/users';
-import { Organizer, User } from '../../types';
-import Button from '../../components/common/Button';
-import Modal from '../../components/common/Modal';
+import { organizersAPI } from '@/api/organizers';
+import { usersAPI } from '@/api/users';
+import { Organizer, User } from '@/types';
+import Button from '@/components/common/Button';
+import Modal from '@/components/common/Modal';
 import toast from 'react-hot-toast';
 import { Check, X, Trash2, Plus } from 'lucide-react';
 
@@ -155,10 +154,8 @@ const OrganizersManagement: React.FC = () => {
   };
 
   return (
-    <div className="flex bg-muted/30 min-h-screen">
-      <Sidebar />
-
-      <div className="flex-1 p-8">
+    <div className="bg-muted/30 min-h-screen">
+      <div className="p-8">
         <div className="flex justify-between mb-8">
           <h1 className="text-3xl font-bold">Organizers Management</h1>
           <Button onClick={() => setShowCreateModal(true)} className="flex gap-2">

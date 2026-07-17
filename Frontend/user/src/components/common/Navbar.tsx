@@ -3,6 +3,7 @@ import { Calendar, LogOut, User, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
+import { SITE_NAME } from '@/config/site';
 
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -21,7 +22,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center gap-2">
               <Calendar className="w-7 h-7 text-primary" />
-              <span className="text-xl font-bold text-foreground">EventHub</span>
+              <span className="text-xl font-bold text-foreground">{SITE_NAME}</span>
             </Link>
           </div>
 

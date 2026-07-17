@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { Types } from "mongoose";
 import { ZodIssue } from "zod";
 import {
@@ -13,9 +13,11 @@ import {
 } from "./ticket.schema";
 import { Ticket } from "./ticket.model";
 import { Event, ITicketType } from "../event/event.schema";
+import { Organizer } from "../organizer/organizer.model";
+import { AuthRequest } from "../auth/auth.middleware";
 
 export const createTicket = async (
-  req: Request<{}, {}, CreateTicketInput>,
+  req: AuthRequest<{}, {}, CreateTicketInput>,
   res: Response
 ) => {
   try {
@@ -120,7 +122,7 @@ export const createTicket = async (
   }
 };
 
-export const getTicketById = async (req: Request<{ id: string }>, res: Response) => {
+export const getTicketById = async (req: AuthRequest<{ id: string }>, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -143,6 +145,14 @@ export const getTicketById = async (req: Request<{ id: string }>, res: Response)
       });
     }
 
+    // Ownership check: users can only view their own tickets (unless admin)
+    if (req.user!.role !== "admin" && ticket.user._id.toString() !== req.user!.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only view your own tickets",
+      });
+    }
+
     return res.status(200).json({
       success: true,
       message: "Ticket fetched successfully",
@@ -157,7 +167,7 @@ export const getTicketById = async (req: Request<{ id: string }>, res: Response)
 };
 
 export const getTicketByReference = async (
-  req: Request<{ reference: string }>,
+  req: AuthRequest<{ reference: string }>,
   res: Response
 ) => {
   try {
@@ -175,6 +185,14 @@ export const getTicketByReference = async (
       });
     }
 
+    // Ownership check: users can only look up their own tickets (unless admin)
+    if (req.user!.role !== "admin" && ticket.user._id.toString() !== req.user!.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only look up your own tickets",
+      });
+    }
+
     return res.status(200).json({
       success: true,
       message: "Ticket fetched successfully",
@@ -189,7 +207,7 @@ export const getTicketByReference = async (
 };
 
 export const getTicketsByUser = async (
-  req: Request<{ userId: string }>,
+  req: AuthRequest<{ userId: string }>,
   res: Response
 ) => {
   try {
@@ -200,6 +218,14 @@ export const getTicketsByUser = async (
       return res.status(400).json({
         success: false,
         message: "Invalid user id",
+      });
+    }
+
+    // Ownership check: users can only view their own tickets (unless admin)
+    if (req.user!.role !== "admin" && userId !== req.user!.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only view your own tickets",
       });
     }
 
@@ -240,7 +266,7 @@ export const getTicketsByUser = async (
 };
 
 export const getTicketsByEvent = async (
-  req: Request<{ eventId: string }>,
+  req: AuthRequest<{ eventId: string }>,
   res: Response
 ) => {
   try {
@@ -290,7 +316,7 @@ export const getTicketsByEvent = async (
 };
 
 export const getTicketsByOrganizer = async (
-  req: Request<{ organizerId: string }>,
+  req: AuthRequest<{ organizerId: string }>,
   res: Response
 ) => {
   try {
@@ -302,6 +328,17 @@ export const getTicketsByOrganizer = async (
         success: false,
         message: "Invalid organizer id",
       });
+    }
+
+    // Ownership check: organizers can only view tickets for their own organizer profile (unless admin)
+    if (req.user!.role !== "admin") {
+      const organizer = await Organizer.findById(organizerId);
+      if (!organizer || organizer.user.toString() !== req.user!.id) {
+        return res.status(403).json({
+          success: false,
+          message: "You can only view tickets for your own events",
+        });
+      }
     }
 
     const query: any = { organizer: organizerId };
@@ -341,7 +378,7 @@ export const getTicketsByOrganizer = async (
 };
 
 export const updateTicket = async (
-  req: Request<{ id: string }, {}, UpdateTicketInput>,
+  req: AuthRequest<{ id: string }, {}, UpdateTicketInput>,
   res: Response
 ) => {
   try {
@@ -392,7 +429,7 @@ export const updateTicket = async (
 };
 
 export const cancelTicket = async (
-  req: Request<{ id: string }, {}, CancelTicketInput>,
+  req: AuthRequest<{ id: string }, {}, CancelTicketInput>,
   res: Response
 ) => {
   try {
@@ -420,6 +457,14 @@ export const cancelTicket = async (
       return res.status(404).json({
         success: false,
         message: "Ticket not found",
+      });
+    }
+
+    // Ownership check: users can only cancel their own tickets (unless admin)
+    if (req.user!.role !== "admin" && ticket.user.toString() !== req.user!.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only cancel your own tickets",
       });
     }
 
@@ -478,7 +523,7 @@ export const cancelTicket = async (
 };
 
 export const checkInTicket = async (
-  req: Request<{}, {}, CheckInInput>,
+  req: AuthRequest<{}, {}, CheckInInput>,
   res: Response
 ) => {
   try {
@@ -542,7 +587,7 @@ export const checkInTicket = async (
 };
 
 export const getTicketStats = async (
-  req: Request<{ eventId: string }>,
+  req: AuthRequest<{ eventId: string }>,
   res: Response
 ) => {
   try {
@@ -602,6 +647,29 @@ export const getTicketStats = async (
         totalServiceFees: revenue.totalServiceFees,
         netRevenue: revenue.totalRevenue - revenue.totalServiceFees,
       },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error: " + error,
+    });
+  }
+};
+
+export const getAllTickets = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const tickets = await Ticket.find()
+      .populate("event", "title eventDate eventTime venue")
+      .populate("user", "name email")
+      .populate("organizer", "organizationName")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      data: tickets,
     });
   } catch (error) {
     return res.status(500).json({

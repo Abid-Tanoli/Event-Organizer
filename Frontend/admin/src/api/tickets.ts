@@ -2,6 +2,11 @@ import axiosInstance from "./axios";
 import { Ticket, ApiResponse, PaginatedResponse } from "../types";
 
 export const ticketsAPI = {
+  getAll: async (): Promise<Ticket[]> => {
+    const response = await axiosInstance.get<ApiResponse<Ticket[]>>("/tickets/all");
+    return response.data.data as Ticket[];
+  },
+
   create: async (data: any): Promise<Ticket> => {
     const response = await axiosInstance.post<ApiResponse<Ticket>>("/tickets/create", data);
     return response.data.data as Ticket;

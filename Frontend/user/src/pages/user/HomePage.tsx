@@ -1,11 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { eventsAPI } from '@/api/events';
+import { statsAPI } from '@/api/stats';
 import { Event } from '@/types';
 import { EventCard } from '@/components/user/EventCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, Calendar, Ticket, TrendingUp, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { EVENTS_PER_PAGE } from '@/config/constants';
+import { SITE_NAME } from '@/config/site';
+
+interface Stats {
+  totalEvents: number;
+  totalUsers: number;
+  totalTicketsSold: number;
+}
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -14,18 +23,22 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const eventsPerPage = 6;
+  const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
     fetchEvents();
   }, [currentPage]);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
   const fetchEvents = async () => {
     setLoading(true);
     try {
       const [featuredRes, publicRes] = await Promise.all([
         eventsAPI.getFeaturedEvents(),
-        eventsAPI.getPublicEvents({ page: currentPage, limit: eventsPerPage }),
+        eventsAPI.getPublicEvents({ page: currentPage, limit: EVENTS_PER_PAGE }),
       ]);
 
       const featuredData = featuredRes;
@@ -38,6 +51,15 @@ const HomePage = () => {
       console.error('Failed to fetch events:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const data = await statsAPI.getSummary();
+      setStats(data);
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
     }
   };
 
@@ -56,7 +78,7 @@ const HomePage = () => {
               Experiences
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-              Book tickets for concerts, conferences, sports, and more. Join thousands of event-goers who trust EventHub.
+              Book tickets for concerts, conferences, sports, and more. Join thousands of event-goers who trust {SITE_NAME}.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" onClick={() => navigate('/events')} className="gap-2">
@@ -75,9 +97,9 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { icon: Calendar, title: '10,000+ Events', desc: 'Discover events across multiple categories' },
+              { icon: Calendar, title: stats ? `${stats.totalEvents.toLocaleString()}+ Events` : 'Events', desc: 'Discover events across multiple categories' },
               { icon: Ticket, title: 'Easy Booking', desc: 'Book tickets in just a few clicks' },
-              { icon: TrendingUp, title: 'Best Prices', desc: 'Get the best deals on event tickets' },
+              { icon: TrendingUp, title: stats ? `${stats.totalTicketsSold.toLocaleString()}+ Tickets Sold` : 'Tickets Sold', desc: 'Trusted by thousands of event-goers' },
             ].map((item) => (
               <div key={item.title} className="text-center p-8 rounded-xl border bg-card hover:shadow-lg transition-shadow">
                 <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 mb-5">
@@ -116,7 +138,7 @@ const HomePage = () => {
 
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {Array.from({ length: 6 }).map((_, i) => (
+              {Array.from({ length: EVENTS_PER_PAGE }).map((_, i) => (
                 <div key={i} className="space-y-3">
                   <Skeleton className="h-48 w-full rounded-xl" />
                   <Skeleton className="h-4 w-3/4" />

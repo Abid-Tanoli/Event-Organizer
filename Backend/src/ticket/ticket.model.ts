@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { DEFAULT_PAYMENT_METHOD } from "../config/constants";
 
 const bookedTicketSchema = new mongoose.Schema({
   ticketType: { type: String, required: true },
@@ -27,7 +28,7 @@ const ticketSchema = new mongoose.Schema({
     enum: ["pending", "completed", "failed", "refunded"],
     default: "pending",
   },
-  paymentMethod: { type: String, default: "card" },
+  paymentMethod: { type: String, default: DEFAULT_PAYMENT_METHOD },
   paymentIntentId: { type: String },
   transactionId: { type: String },
   bookingStatus: {

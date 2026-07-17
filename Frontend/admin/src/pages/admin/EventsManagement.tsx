@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import Sidebar from '../../components/admin/Sidebar';
-import { eventsAPI } from '../../api/events';
-import { organizersAPI } from '../../api/organizers';
-import { categoriesAPI } from '../../api/categories';
-import { Event, Organizer, Category } from '../../types';
-import Button from '../../components/common/Button';
-import Modal from '../../components/common/Modal';
+import React, { useEffect, useState, useRef } from 'react';
+import { eventsAPI } from '@/api/events';
+import { organizersAPI } from '@/api/organizers';
+import { categoriesAPI } from '@/api/categories';
+import { Event, Organizer, Category } from '@/types';
+import Button from '@/components/common/Button';
+import Modal from '@/components/common/Modal';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 import { Check, X, Eye, Trash2, Plus } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 const EventsManagement: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -19,6 +19,8 @@ const EventsManagement: React.FC = () => {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
+  const coverImageRef = useRef<HTMLInputElement>(null);
   const [newEvent, setNewEvent] = useState({
     title: '',
     description: '',
@@ -156,9 +158,29 @@ const EventsManagement: React.FC = () => {
     }
 
     try {
-      await eventsAPI.createEvent(newEvent);
+      const formData = new FormData();
+      formData.append('title', newEvent.title);
+      formData.append('description', newEvent.description);
+      formData.append('shortDescription', newEvent.shortDescription);
+      formData.append('organizer', newEvent.organizer);
+      formData.append('category', newEvent.category);
+      formData.append('venue', JSON.stringify(newEvent.venue));
+      formData.append('eventDate', newEvent.eventDate);
+      formData.append('eventTime', newEvent.eventTime);
+      formData.append('eventType', newEvent.eventType);
+      formData.append('ticketTypes', JSON.stringify(newEvent.ticketTypes));
+      formData.append('refundPolicy', newEvent.refundPolicy);
+      formData.append('termsAndConditions', newEvent.termsAndConditions);
+      formData.append('tags', JSON.stringify(newEvent.tags));
+      if (coverImageFile) {
+        formData.append('coverImage', coverImageFile);
+      }
+
+      await eventsAPI.createEvent(formData);
       toast.success('Event created successfully');
       setShowCreateModal(false);
+      setCoverImageFile(null);
+      if (coverImageRef.current) coverImageRef.current.value = '';
       setNewEvent({
         title: '',
         description: '',
@@ -183,13 +205,24 @@ const EventsManagement: React.FC = () => {
     }
   };
 
-  return (
-    <div className="flex bg-gray-50 min-h-screen">
-      <Sidebar />
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return 'default';
+      case 'pending':
+        return 'secondary';
+      case 'rejected':
+        return 'destructive';
+      default:
+        return 'secondary';
+    }
+  };
 
-      <div className="flex-1 p-8">
+  return (
+    <div className="bg-background min-h-screen">
+      <div className="p-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Events Management</h1>
+          <h1 className="text-3xl font-bold text-foreground">Events Management</h1>
           <Button
             variant="primary"
             onClick={() => setShowCreateModal(true)}
@@ -201,42 +234,42 @@ const EventsManagement: React.FC = () => {
 
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading events...</p>
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading events...</p>
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div className="bg-card rounded-xl shadow-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-muted/60">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                       Event
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                       Featured
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-border">
                   {events.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                      <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">
                         No events found. Create your first event!
                       </td>
                     </tr>
                   ) : (
                     events.map((event) => (
-                      <tr key={event._id} className="hover:bg-gray-50">
+                      <tr key={event._id} className="hover:bg-muted/50">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <img
@@ -245,44 +278,33 @@ const EventsManagement: React.FC = () => {
                               className="w-12 h-12 rounded object-cover"
                             />
                             <div>
-                              <div className="font-medium text-gray-900">{event.title}</div>
-                              <div className="text-sm text-gray-500">
+                              <div className="font-medium text-foreground">{event.title}</div>
+                              <div className="text-sm text-muted-foreground">
                                 {event.venue?.city || 'N/A'}
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">
+                        <td className="px-6 py-4 text-sm text-foreground">
                           {event.eventDate
                             ? format(new Date(event.eventDate), 'MMM dd, yyyy')
                             : 'N/A'}
                         </td>
                         <td className="px-6 py-4">
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium ${event.status === 'approved'
-                                ? 'bg-green-100 text-green-800'
-                                : event.status === 'pending'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : event.status === 'rejected'
-                                    ? 'bg-red-100 text-red-800'
-                                    : 'bg-gray-100 text-gray-800'
-                              }`}
-                          >
+                          <Badge variant={getStatusBadgeVariant(event.status)}>
                             {event.status}
-                          </span>
+                          </Badge>
                         </td>
                         <td className="px-6 py-4">
-                          <button
+                          <Badge
+                            variant={event.isFeatured ? 'default' : 'secondary'}
+                            className="cursor-pointer"
                             onClick={() =>
                               handleToggleFeatured(event._id, event.isFeatured)
                             }
-                            className={`px-3 py-1 rounded-full text-xs font-medium ${event.isFeatured
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-gray-100 text-gray-800'
-                              }`}
                           >
-                            {event.isFeatured ? '⭐ Featured' : 'Not Featured'}
-                          </button>
+                            {event.isFeatured ? 'Featured' : 'Not Featured'}
+                          </Badge>
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
@@ -346,13 +368,13 @@ const EventsManagement: React.FC = () => {
         title="Reject Event"
       >
         <div className="space-y-4">
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Please provide a reason for rejecting this event:
           </p>
           <textarea
             value={rejectionReason}
             onChange={(e) => setRejectionReason(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none h-32"
+            className="w-full px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none h-32"
             placeholder="Enter rejection reason..."
           />
           <div className="flex gap-2">
@@ -385,19 +407,19 @@ const EventsManagement: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Title */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-1">Title *</label>
               <input
                 type="text"
                 placeholder="Event Title"
                 value={newEvent.title}
                 onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
-                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             {/* Short Description */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Short Description *
               </label>
               <input
@@ -407,13 +429,13 @@ const EventsManagement: React.FC = () => {
                 onChange={(e) =>
                   setNewEvent({ ...newEvent, shortDescription: e.target.value })
                 }
-                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             {/* Description */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Description *
               </label>
               <textarea
@@ -422,13 +444,13 @@ const EventsManagement: React.FC = () => {
                 onChange={(e) =>
                   setNewEvent({ ...newEvent, description: e.target.value })
                 }
-                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 h-24"
+                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary h-24"
               />
             </div>
 
             {/* Organizer Dropdown */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Organizer *
               </label>
               <select
@@ -436,7 +458,7 @@ const EventsManagement: React.FC = () => {
                 onChange={(e) =>
                   setNewEvent({ ...newEvent, organizer: e.target.value })
                 }
-                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="">Select organizer</option>
                 {organizers.map((org) => (
@@ -449,7 +471,7 @@ const EventsManagement: React.FC = () => {
 
             {/* Category Dropdown */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Category *
               </label>
               <select
@@ -457,7 +479,7 @@ const EventsManagement: React.FC = () => {
                 onChange={(e) =>
                   setNewEvent({ ...newEvent, category: e.target.value })
                 }
-                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="">Select category</option>
                 {categories.map((cat) => (
@@ -470,7 +492,7 @@ const EventsManagement: React.FC = () => {
 
             {/* Venue Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Venue Name *
               </label>
               <input
@@ -483,13 +505,13 @@ const EventsManagement: React.FC = () => {
                     venue: { ...newEvent.venue, name: e.target.value },
                   })
                 }
-                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             {/* Venue Address */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Venue Address
               </label>
               <input
@@ -502,13 +524,13 @@ const EventsManagement: React.FC = () => {
                     venue: { ...newEvent.venue, address: e.target.value },
                   })
                 }
-                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             {/* City */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-1">City *</label>
               <input
                 type="text"
                 placeholder="City"
@@ -519,13 +541,13 @@ const EventsManagement: React.FC = () => {
                     venue: { ...newEvent.venue, city: e.target.value },
                   })
                 }
-                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             {/* Country */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Country *
               </label>
               <input
@@ -538,13 +560,13 @@ const EventsManagement: React.FC = () => {
                     venue: { ...newEvent.venue, country: e.target.value },
                   })
                 }
-                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             {/* Event Date */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Event Date *
               </label>
               <input
@@ -553,13 +575,13 @@ const EventsManagement: React.FC = () => {
                 onChange={(e) =>
                   setNewEvent({ ...newEvent, eventDate: e.target.value })
                 }
-                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             {/* Event Time */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Event Time *
               </label>
               <input
@@ -568,13 +590,13 @@ const EventsManagement: React.FC = () => {
                 onChange={(e) =>
                   setNewEvent({ ...newEvent, eventTime: e.target.value })
                 }
-                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             {/* Event Type */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Event Type
               </label>
               <select
@@ -585,7 +607,7 @@ const EventsManagement: React.FC = () => {
                     eventType: e.target.value as 'online' | 'offline' | 'hybrid',
                   })
                 }
-                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="offline">Offline</option>
                 <option value="online">Online</option>
@@ -595,7 +617,7 @@ const EventsManagement: React.FC = () => {
 
             {/* Ticket Price */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Ticket Price
               </label>
               <input
@@ -611,13 +633,13 @@ const EventsManagement: React.FC = () => {
                     ],
                   })
                 }
-                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             {/* Ticket Quantity */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
                 Total Tickets
               </label>
               <input
@@ -636,24 +658,25 @@ const EventsManagement: React.FC = () => {
                     ],
                   })
                 }
-                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             {/* Cover Image */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Cover Image URL
+              <label className="block text-sm font-medium text-muted-foreground mb-1">
+                Cover Image
               </label>
               <input
-                type="url"
-                placeholder="https://example.com/image.jpg"
-                value={newEvent.coverImage}
-                onChange={(e) =>
-                  setNewEvent({ ...newEvent, coverImage: e.target.value })
-                }
-                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                ref={coverImageRef}
+                type="file"
+                accept="image/*"
+                onChange={(e) => setCoverImageFile(e.target.files?.[0] || null)}
+                className="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-primary"
               />
+              {coverImageFile && (
+                <p className="text-sm text-muted-foreground mt-1">Selected: {coverImageFile.name}</p>
+              )}
             </div>
           </div>
 

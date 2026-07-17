@@ -4,11 +4,18 @@ import bcrypt from "bcryptjs";
 import { User } from "../src/user/user.model";
 import { Organizer } from "../src/organizer/organizer.model";
 import { Category } from "../src/category/category.model";
-import { Event } from "../src/event/event.model";
+import { Event } from "../src/event/event.schema";
+import { BCRYPT_SALT_ROUNDS } from "../src/config/constants";
 
 dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/event-booking";
+
+const daysFromNow = (days: number): Date => {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    return d;
+};
 
 const seed = async () => {
     try {
@@ -25,7 +32,7 @@ const seed = async () => {
         console.log("Cleared existing data...");
 
         // Create Users
-        const hashedPassword = await bcrypt.hash("password123", 10);
+        const hashedPassword = await bcrypt.hash("password123", BCRYPT_SALT_ROUNDS);
 
         const users = await User.create([
             {
@@ -111,13 +118,13 @@ const seed = async () => {
 
         console.log("Categories created...");
 
-        // Create Events
+        // Create Events with dynamic dates relative to now
         const eventsData = [
             // Tech Events
             {
                 organizer: organizers[0]._id,
                 category: categories[0]._id,
-                title: "Global Tech Summit 2024",
+                title: "Global Tech Summit",
                 description: "Join industry leaders for the biggest tech conference of the year. Topics include AI, Blockchain, and Cloud Computing.",
                 shortDescription: "The biggest tech conference of the year.",
                 coverImage: "/event-placeholder.svg",
@@ -127,7 +134,7 @@ const seed = async () => {
                     city: "San Francisco",
                     country: "USA",
                 },
-                eventDate: new Date("2024-09-15"),
+                eventDate: daysFromNow(15),
                 eventTime: "09:00",
                 ticketTypes: [
                     { name: "General Admission", price: 299, quantity: 500, soldCount: 0 },
@@ -154,7 +161,7 @@ const seed = async () => {
                     city: "San Jose",
                     country: "USA",
                 },
-                eventDate: new Date("2024-10-10"),
+                eventDate: daysFromNow(30),
                 eventTime: "10:00",
                 ticketTypes: [
                     { name: "Standard", price: 50, quantity: 50, soldCount: 0 },
@@ -179,7 +186,7 @@ const seed = async () => {
                     city: "San Francisco",
                     country: "USA",
                 },
-                eventDate: new Date("2024-11-05"),
+                eventDate: daysFromNow(45),
                 eventTime: "18:00",
                 ticketTypes: [
                     { name: "Entry", price: 0, quantity: 100, soldCount: 0 },
@@ -199,7 +206,7 @@ const seed = async () => {
                 shortDescription: "AI impact on jobs.",
                 coverImage: "/event-placeholder.svg",
                 venue: { name: "Online", address: "Zoom", city: "Online", country: "Online" },
-                eventDate: new Date("2024-12-01"),
+                eventDate: daysFromNow(60),
                 eventTime: "14:00",
                 ticketTypes: [
                     { name: "Webinar Access", price: 15, quantity: 1000, soldCount: 0 },
@@ -227,7 +234,7 @@ const seed = async () => {
                     city: "London",
                     country: "UK",
                 },
-                eventDate: new Date("2024-09-20"),
+                eventDate: daysFromNow(20),
                 eventTime: "10:00",
                 ticketTypes: [
                     { name: "Adult", price: 20, quantity: 200, soldCount: 0 },
@@ -254,7 +261,7 @@ const seed = async () => {
                     city: "London",
                     country: "UK",
                 },
-                eventDate: new Date("2024-08-30"),
+                eventDate: daysFromNow(10),
                 eventTime: "19:00",
                 ticketTypes: [
                     { name: "General Admission", price: 35, quantity: 500, soldCount: 0 },
@@ -279,7 +286,7 @@ const seed = async () => {
                     city: "London",
                     country: "UK",
                 },
-                eventDate: new Date("2024-10-15"),
+                eventDate: daysFromNow(35),
                 eventTime: "14:00",
                 ticketTypes: [
                     { name: "Workshop Fee", price: 60, quantity: 15, soldCount: 0 },
@@ -299,7 +306,7 @@ const seed = async () => {
                 shortDescription: "Explore museums from home.",
                 coverImage: "/event-placeholder.svg",
                 venue: { name: "Online", address: "Web", city: "Online", country: "Online" },
-                eventDate: new Date("2024-11-20"),
+                eventDate: daysFromNow(50),
                 eventTime: "15:00",
                 ticketTypes: [
                     { name: "Access Pass", price: 10, quantity: 1000, soldCount: 0 },

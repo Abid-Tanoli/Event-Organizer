@@ -40,7 +40,7 @@ const Button: React.FC<ButtonProps> = ({
     type={type}
     variant={variantMap[variant]}
     size={sizeMap[size]}
-    className={cn(variant === 'success' && 'bg-emerald-600 text-white hover:bg-emerald-700', className)}
+    className={cn(variant === 'success' && 'bg-accent text-accent-foreground hover:opacity-90', className)}
     disabled={disabled || loading}
     {...props}
   >
