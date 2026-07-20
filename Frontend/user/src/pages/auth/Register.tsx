@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Calendar, Mail, Lock, User } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { SITE_NAME } from '@/config/site';
 
 const registerSchema = z.object({

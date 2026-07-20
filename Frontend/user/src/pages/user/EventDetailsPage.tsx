@@ -16,7 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Calendar, MapPin, Share2, Heart, ArrowLeft, Globe, Mail } from 'lucide-react';
 import { format } from 'date-fns';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { useAuthStore } from '@/store/authStore';
 import { SERVICE_FEE_PERCENT, PAYMENT_METHOD } from '@/config/constants';
 

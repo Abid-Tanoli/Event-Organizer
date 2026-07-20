@@ -9,11 +9,22 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  User,
+  ChevronDown,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
+import { useTheme } from '@/hooks/useTheme';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 
 const menuItems = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
@@ -27,7 +38,8 @@ const menuItems = [
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
+  const { theme, toggleTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -45,6 +57,36 @@ const Sidebar = () => {
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
+      </div>
+
+      <div className={cn('p-3 border-b border-sidebar-border', collapsed && 'flex justify-center')}>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className={cn('flex items-center gap-3 w-full justify-start px-3 py-2 h-auto hover:bg-sidebar-accent', collapsed && 'justify-center p-2')}>
+              <div className="w-8 h-8 bg-sidebar-primary rounded-full flex items-center justify-center shrink-0">
+                <User className="w-4 h-4 text-sidebar-primary-foreground" />
+              </div>
+              {!collapsed && (
+                <>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.name || 'Admin'}</p>
+                    <p className="text-xs text-sidebar-foreground/60 truncate">{user?.email || ''}</p>
+                  </div>
+                  <ChevronDown className="w-4 h-4 text-sidebar-foreground/60" />
+                </>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align={collapsed ? 'center' : 'start'} className="w-56">
+            <DropdownMenuItem onClick={toggleTheme}>
+              {theme === 'dark' ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />}
+              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => { logout(); navigate('/admin/login'); }} className="text-destructive focus:text-destructive">
+              <LogOut className="w-4 h-4 mr-2" /> Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <nav className="flex-1 p-3 space-y-1">
@@ -70,21 +112,6 @@ const Sidebar = () => {
           );
         })}
       </nav>
-
-      <div className="p-3 border-t border-sidebar-border">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start text-sidebar-foreground/80 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent"
-          onClick={() => {
-            logout();
-            navigate('/admin/login');
-          }}
-        >
-          <LogOut className="w-4 h-4 shrink-0" />
-          {!collapsed && <span className="ml-2">Logout</span>}
-        </Button>
-      </div>
     </div>
   );
 };

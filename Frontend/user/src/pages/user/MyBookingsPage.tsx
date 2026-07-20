@@ -3,18 +3,32 @@ import { ticketsAPI } from '@/api/tickets';
 import { useAuthStore } from '@/store/authStore';
 import { Ticket } from '@/types';
 import Loader from '@/components/common/Loader';
-import { Calendar, MapPin, X } from 'lucide-react';
+import EmptyState from '@/components/common/EmptyState';
+import ErrorState from '@/components/common/ErrorState';
+import { Calendar, MapPin, X, Ticket as TicketIcon } from 'lucide-react';
 import { format } from 'date-fns';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog';
 
 const MyBookingsPage: React.FC = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cancelTargetId, setCancelTargetId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user?._id) fetchBookings();
@@ -22,22 +36,25 @@ const MyBookingsPage: React.FC = () => {
 
   const fetchBookings = async () => {
     setLoading(true);
+    setError(null);
     try {
       const response = await ticketsAPI.getByUser(user!._id);
       setBookings(response.tickets ?? []);
     } catch (error) {
       console.error('Failed to fetch bookings:', error);
+      setError('Failed to load bookings. Please try again.');
       toast.error('Failed to load bookings');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancel = async (ticketId: string) => {
-    if (!window.confirm('Are you sure you want to cancel this booking?')) return;
+  const handleCancel = async () => {
+    if (!cancelTargetId) return;
     try {
-      await ticketsAPI.cancel(ticketId, 'Cancelled by user');
+      await ticketsAPI.cancel(cancelTargetId, 'Cancelled by user');
       toast.success('Booking cancelled');
+      setCancelTargetId(null);
       fetchBookings();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to cancel');
@@ -46,18 +63,29 @@ const MyBookingsPage: React.FC = () => {
 
   if (loading) return <Loader />;
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-4xl font-bold text-foreground mb-8">My Bookings</h1>
+          <ErrorState message={error} onRetry={() => { setError(null); fetchBookings(); }} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-4xl font-bold text-foreground mb-8">My Bookings</h1>
 
         {bookings.length === 0 ? (
-          <div className="text-center py-16 bg-card rounded-xl border shadow-sm">
-            <p className="text-xl text-muted-foreground mb-4">No bookings yet</p>
-            <Button onClick={() => navigate('/events')}>
-              Browse Events
-            </Button>
-          </div>
+          <EmptyState
+            icon={TicketIcon}
+            title="No bookings yet"
+            description="Browse events and book your first ticket."
+            action={{ label: 'Browse Events', onClick: () => navigate('/events') }}
+          />
         ) : (
           <div className="space-y-4">
             {bookings.map((booking) => {
@@ -107,7 +135,7 @@ const MyBookingsPage: React.FC = () => {
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => handleCancel(booking._id)}
+                        onClick={() => setCancelTargetId(booking._id)}
                         className="flex items-center gap-2"
                       >
                         <X className="w-4 h-4" /> Cancel
@@ -120,6 +148,24 @@ const MyBookingsPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Cancel Booking AlertDialog */}
+      <AlertDialog open={!!cancelTargetId} onOpenChange={(open) => !open && setCancelTargetId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Booking</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this booking? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>No, Keep Booking</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCancel} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Yes, Cancel Booking
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

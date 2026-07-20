@@ -4,9 +4,11 @@ import { categoriesAPI } from '@/api/categories';
 import { Event, Category } from '@/types';
 import { EventCard } from '@/components/user/EventCard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
+import Pagination from '@/components/common/Pagination';
+import EmptyState from '@/components/common/EmptyState';
+import ErrorState from '@/components/common/ErrorState';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, CalendarX } from 'lucide-react';
 
 const EventsPage = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -19,6 +21,7 @@ const EventsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [limit] = useState(6);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCategories();
@@ -37,6 +40,7 @@ const EventsPage = () => {
     let isActive = true;
     const fetchEvents = async () => {
       setLoading(true);
+      setError(null);
       try {
         const response = await eventsAPI.getPublicEvents({
           category: selectedCategory || undefined,
@@ -52,6 +56,7 @@ const EventsPage = () => {
         }
       } catch (error) {
         console.error('Failed to fetch events:', error);
+        setError('Failed to load events. Please try again.');
       } finally {
         if (isActive) setLoading(false);
       }
@@ -117,10 +122,15 @@ const EventsPage = () => {
               </div>
             ))}
           </div>
+        ) : error ? (
+          <ErrorState message={error} onRetry={() => { setError(null); setLoading(true); }} />
         ) : events.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-xl text-muted-foreground">No events found</p>
-          </div>
+          <EmptyState
+            icon={CalendarX}
+            title="No events found"
+            description={searchTerm || selectedCategory || selectedType ? 'Try adjusting your filters or search terms.' : 'Check back later for new events.'}
+            action={searchTerm || selectedCategory || selectedType ? { label: 'Clear filters', onClick: () => { setSearchTerm(''); setSelectedCategory(''); setSelectedType(''); } } : undefined}
+          />
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -129,19 +139,7 @@ const EventsPage = () => {
               ))}
             </div>
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 mt-12">
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
-                  Previous
-                </Button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <Button key={page} variant={currentPage === page ? 'default' : 'outline'} size="sm" className="w-9" onClick={() => setCurrentPage(page)}>
-                    {page}
-                  </Button>
-                ))}
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>
-                  Next
-                </Button>
-              </div>
+              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
             )}
           </>
         )}

@@ -1,0 +1,11 @@
+npm warn exec The following package was not found and will be installed: ts-node-dev@2.0.0
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+Error: listen EADDRINUSE: address already in use :::5001
+    at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+    at listenInCluster (node:net:1997:12)
+    at Server.listen (node:net:2102:7)
+    at app.listen (C:\Users\Abid\Desktop\Abid Web Development\Event-Organizer\Backend\node_modules\express\lib\application.js:635:24)
+    at startServer (C:\Users\Abid\Desktop\Abid Web Development\Event-Organizer\Backend\src\index.ts:113:9)
+    at processTicksAndRejections (node:internal/process/task_queues:103:5)

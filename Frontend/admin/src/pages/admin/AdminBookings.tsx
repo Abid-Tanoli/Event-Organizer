@@ -13,11 +13,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import Loader from '@/components/common/Loader';
+import Pagination from '@/components/common/Pagination';
+
+const ITEMS_PER_PAGE = 10;
 
 const AdminBookings: React.FC = () => {
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchTickets();
@@ -61,6 +66,13 @@ const AdminBookings: React.FC = () => {
       default: return 'secondary' as const;
     }
   };
+
+  // Pagination
+  const totalPages = Math.ceil(filteredTickets.length / ITEMS_PER_PAGE);
+  const paginatedTickets = filteredTickets.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <div className="bg-background min-h-screen">
@@ -106,18 +118,19 @@ const AdminBookings: React.FC = () => {
             <Input
               placeholder="Search by reference, name, email, or event..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               className="pl-10"
             />
           </div>
         </div>
 
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
-          </div>
+          <Loader />
         ) : (
-          <div className="bg-card rounded-xl shadow-lg overflow-hidden">
+          <div className="bg-card rounded-xl shadow-lg overflow-hidden border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -132,27 +145,27 @@ const AdminBookings: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTickets.length === 0 ? (
+                {paginatedTickets.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                       No bookings found
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredTickets.map((ticket) => (
+                  paginatedTickets.map((ticket) => (
                     <TableRow key={ticket._id}>
                       <TableCell className="font-mono text-sm">{ticket.bookingReference}</TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{ticket.user?.name || 'N/A'}</div>
+                          <div className="font-medium text-foreground">{ticket.user?.name || 'N/A'}</div>
                           <div className="text-xs text-muted-foreground">{ticket.user?.email}</div>
                         </div>
                       </TableCell>
-                      <TableCell className="max-w-[200px] truncate">{ticket.event?.title || 'N/A'}</TableCell>
-                      <TableCell>
+                      <TableCell className="max-w-[200px] truncate text-foreground">{ticket.event?.title || 'N/A'}</TableCell>
+                      <TableCell className="text-foreground">
                         {ticket.tickets?.length || 0} type{(ticket.tickets?.length || 0) !== 1 ? 's' : ''}
                       </TableCell>
-                      <TableCell className="font-medium">${ticket.totalAmount?.toFixed(2) || '0.00'}</TableCell>
+                      <TableCell className="font-medium text-foreground">${ticket.totalAmount?.toFixed(2) || '0.00'}</TableCell>
                       <TableCell>
                         <Badge variant={ticket.paymentStatus === 'completed' ? 'default' : 'secondary'}>
                           {ticket.paymentStatus}
@@ -171,6 +184,9 @@ const AdminBookings: React.FC = () => {
                 )}
               </TableBody>
             </Table>
+            <div className="pb-4">
+              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+            </div>
           </div>
         )}
       </div>

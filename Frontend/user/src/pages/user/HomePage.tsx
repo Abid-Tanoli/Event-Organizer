@@ -6,7 +6,10 @@ import { Event } from '@/types';
 import { EventCard } from '@/components/user/EventCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, Calendar, Ticket, TrendingUp, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import Pagination from '@/components/common/Pagination';
+import EmptyState from '@/components/common/EmptyState';
+import ErrorState from '@/components/common/ErrorState';
+import { Search, Calendar, Ticket, TrendingUp, Sparkles, CalendarX } from 'lucide-react';
 import { EVENTS_PER_PAGE } from '@/config/constants';
 import { SITE_NAME } from '@/config/site';
 
@@ -24,6 +27,7 @@ const HomePage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchEvents();
@@ -35,6 +39,7 @@ const HomePage = () => {
 
   const fetchEvents = async () => {
     setLoading(true);
+    setError(null);
     try {
       const [featuredRes, publicRes] = await Promise.all([
         eventsAPI.getFeaturedEvents(),
@@ -49,6 +54,7 @@ const HomePage = () => {
       setTotalPages(publicRes.pagination.totalPages);
     } catch (error: any) {
       console.error('Failed to fetch events:', error);
+      setError('Failed to load events. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -146,10 +152,10 @@ const HomePage = () => {
                 </div>
               ))}
             </div>
+          ) : error ? (
+            <ErrorState message={error} onRetry={() => { setError(null); fetchEvents(); }} />
           ) : allEvents.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-xl text-muted-foreground">No events available at the moment</p>
-            </div>
+            <EmptyState icon={CalendarX} title="No events available" description="Check back later for new events." />
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
@@ -159,27 +165,7 @@ const HomePage = () => {
               </div>
 
               {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
-                    <ChevronLeft className="w-4 h-4" /> Previous
-                  </Button>
-                  <div className="flex gap-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <Button
-                        key={page}
-                        variant={currentPage === page ? 'default' : 'outline'}
-                        size="sm"
-                        className="w-9"
-                        onClick={() => setCurrentPage(page)}
-                      >
-                        {page}
-                      </Button>
-                    ))}
-                  </div>
-                  <Button variant="outline" size="sm" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>
-                    Next <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
+                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
               )}
             </>
           )}

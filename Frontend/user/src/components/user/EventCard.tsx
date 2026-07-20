@@ -4,7 +4,7 @@ import { Event } from '@/types';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { eventsAPI } from '@/api/events';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface EventCardProps {
   event: Event;
