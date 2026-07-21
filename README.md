@@ -6,41 +6,31 @@ A full-stack event booking platform built with React, TypeScript, Node.js, Expre
 
 ```
 Event-Organizer/
-├── Backend/              # Node.js + Express + MongoDB API
-│   ├── api/              # Vercel serverless entry point
+├── Backend/                    # Node.js + Express + MongoDB API
+│   ├── api/index.ts            # Vercel serverless entry point
 │   ├── src/
-│   │   ├── auth/         # Authentication (register/login/JWT)
-│   │   ├── user/         # User management
-│   │   ├── admin/        # Admin management
-│   │   ├── event/        # Events CRUD
-│   │   ├── category/     # Categories CRUD
-│   │   ├── organizer/    # Organizer management
-│   │   ├── ticket/       # Ticket booking
-│   │   ├── payment/      # Payment processing
-│   │   ├── mail/         # Email notifications
-│   │   ├── config/       # DB and mail config
-│   │   └── middlewares/  # Auth, role, validation, upload
+│   │   ├── auth/               # Authentication (register/login/JWT)
+│   │   ├── user/               # User management
+│   │   ├── admin/              # Admin management
+│   │   ├── event/              # Events CRUD
+│   │   ├── category/           # Categories CRUD
+│   │   ├── organizer/          # Organizer management
+│   │   ├── ticket/             # Ticket booking
+│   │   ├── payment/            # Payment processing
+│   │   ├── stats/              # Platform statistics
+│   │   ├── config/             # DB, Cloudinary, constants
+│   │   └── middlewares/        # Auth, role, validation, upload
+│   ├── vercel.json             # Serverless config
+│   ├── .vercelignore           # Exclude from deployment bundle
 │   ├── .env.example
 │   └── package.json
 ├── Frontend/
-│   ├── user/             # Public user app (React + Vite + TypeScript)
-│   │   ├── src/
-│   │   │   ├── api/          # API service files (axios)
-│   │   │   ├── pages/
-│   │   │   │   ├── user/     # Home, Events, EventDetails, MyBookings
-│   │   │   │   └── auth/     # Login, Register
-│   │   │   ├── components/   # Reusable components
-│   │   │   └── store/        # Zustand auth store
+│   ├── user/                   # Public user app (React + Vite + TypeScript)
+│   │   ├── vercel.json         # SPA rewrite rules
 │   │   ├── .env.example
 │   │   └── package.json
-│   └── admin/            # Admin dashboard app (React + Vite + TypeScript)
-│       ├── src/
-│       │   ├── api/          # API service files (axios)
-│       │   ├── pages/
-│       │   │   ├── admin/    # Dashboard, Events, Users, Organizers, Categories, Bookings
-│       │   │   └── auth/     # Admin Login
-│       │   ├── components/   # Reusable components
-│       │   └── store/        # Zustand auth store
+│   └── admin/                  # Admin dashboard app (React + Vite + TypeScript)
+│       ├── vercel.json         # SPA rewrite rules
 │       ├── .env.example
 │       └── package.json
 ```
@@ -48,87 +38,38 @@ Event-Organizer/
 ## Prerequisites
 
 - Node.js >= 18
-- npm or pnpm
+- npm
 - MongoDB Atlas account (or local MongoDB)
+- Cloudinary account (free tier) for image uploads
 
-## Backend Setup
+## Local Development Setup
 
-1. Navigate to backend:
-   ```
-   cd Backend
-   ```
+### Backend
 
-2. Install dependencies:
-   ```
-   npm install
-   ```
+```bash
+cd Backend
+npm install
+cp .env.example .env   # then fill in your values
+npm run dev            # starts on http://localhost:5001
+```
 
-3. Create environment file:
-   ```
-   cp .env.example .env
-   ```
+### Frontend / User
 
-4. Edit `Backend/.env` and add your MongoDB connection string:
-   - Go to MongoDB Atlas > Database > Connect > Drivers
-   - Copy the connection string
-   - Replace `<username>`, `<password>`, `<cluster>` with your values
-   - Example:
-     ```
-     MONGO_URI=mongodb+srv://youruser:yourpassword@cluster0.xxxxx.mongodb.net/eventbooking?retryWrites=true&w=majority
-     ```
+```bash
+cd Frontend/user
+npm install
+npm run dev            # starts on http://localhost:3000
+```
 
-5. Run backend:
-   ```
-   npm run dev
-   ```
-   Server starts on http://localhost:5001
+### Frontend / Admin
 
-## Frontend Setup
+```bash
+cd Frontend/admin
+npm install
+npm run dev            # starts on http://localhost:3001
+```
 
-There are two frontend apps:
-
-### Frontend/User (Public)
-
-1. Navigate:
-   ```
-   cd Frontend/user
-   ```
-
-2. Install:
-   ```
-   npm install
-   ```
-
-3. The `.env` already points to local backend:
-   ```
-   VITE_API_URL=http://localhost:5001/api
-   ```
-
-4. Run:
-   ```
-   npm run dev
-   ```
-   Opens on http://localhost:3000
-
-### Frontend/Admin (Dashboard)
-
-1. Navigate:
-   ```
-   cd Frontend/admin
-   ```
-
-2. Install:
-   ```
-   npm install
-   ```
-
-3. Run:
-   ```
-   npm run dev
-   ```
-   Opens on http://localhost:3001
-
-### Running All Three (Backend + Both Frontends)
+### Running All Three
 
 Open three terminals:
 
@@ -138,6 +79,94 @@ Open three terminals:
 | User frontend | `cd Frontend/user && npm run dev` |
 | Admin frontend | `cd Frontend/admin && npm run dev` |
 
+## Vercel Deployment
+
+This project deploys as **three independent Vercel projects**, each from its own folder.
+
+### Step 1 — Deploy Backend (API)
+
+1. Push the repo to GitHub.
+2. In [vercel.com/new](https://vercel.com/new), click **Import Git Repository** and select your repo.
+3. Set **Root Directory** to `Backend`.
+4. Vercel auto-detects the `vercel.json` — confirm the build settings:
+   - Framework Preset: **Other**
+   - Build Command: (uses vercel.json `builds` config)
+   - Output Directory: (not needed — serverless function)
+5. Add these **Environment Variables** in the Vercel dashboard:
+
+| Variable | Value |
+|----------|-------|
+| `NODE_ENV` | `production` |
+| `PORT` | `5001` |
+| `MONGO_URI` | Your MongoDB Atlas connection string |
+| `JWT_SECRET` | A long random secret (64+ chars) |
+| `JWT_EXPIRES_IN` | `7d` |
+| `BCRYPT_SALT_ROUNDS` | `10` |
+| `SERVICE_FEE_PERCENT` | `0.05` |
+| `CURRENCY` | `usd` |
+| `CORS_ORIGIN` | `https://your-user-app.vercel.app,https://your-admin-app.vercel.app` |
+| `CLOUDINARY_CLOUD_NAME` | From Cloudinary dashboard |
+| `CLOUDINARY_API_KEY` | From Cloudinary dashboard |
+| `CLOUDINARY_API_SECRET` | From Cloudinary dashboard |
+
+6. Deploy. Note the production URL (e.g. `https://event-organizer-backend.vercel.app`).
+
+### Step 2 — Deploy Frontend / User
+
+1. In Vercel, import the same repo again.
+2. Set **Root Directory** to `Frontend/user`.
+3. Framework Preset: **Vite**.
+4. Add environment variable:
+
+| Variable | Value |
+|----------|-------|
+| `VITE_API_URL` | `https://your-backend.vercel.app/api` |
+
+5. The `vercel.json` handles SPA rewrites automatically.
+6. Deploy. Note the URL (e.g. `https://event-organizer-user.vercel.app`).
+
+### Step 3 — Deploy Frontend / Admin
+
+1. In Vercel, import the same repo again.
+2. Set **Root Directory** to `Frontend/admin`.
+3. Framework Preset: **Vite**.
+4. Add environment variable:
+
+| Variable | Value |
+|----------|-------|
+| `VITE_API_URL` | `https://your-backend.vercel.app/api` |
+
+5. Deploy. Note the URL (e.g. `https://event-organizer-admin.vercel.app`).
+
+### Step 4 — Update Backend CORS
+
+After both frontends are deployed, go back to the **Backend** Vercel project settings and update `CORS_ORIGIN` to include both frontend production URLs (comma-separated):
+
+```
+https://event-organizer-user.vercel.app,https://event-organizer-admin.vercel.app
+```
+
+Redeploy the backend for the change to take effect.
+
+## Admin Login
+
+- Go to the admin app URL (e.g. `https://event-organizer-admin.vercel.app/admin/login`)
+- Or create an admin via the seed script: `cd Backend && npm run seed`
+- Or call `POST /api/admins/create` with `{ name, email, password }` (requires an existing admin auth token)
+
+## Health Check
+
+- `GET /health` — returns `{ success: true, message: "Server is running", data: { time: "..." } }`
+- No database dependency — safe for uptime monitors.
+
+## Image Uploads
+
+Images are uploaded to **Cloudinary** via memory buffer (multer memory storage). This works on Vercel's serverless filesystem which has no persistent disk.
+
+- Cover images uploaded via the event create/update endpoints are stored in Cloudinary under the `event-organizer` folder.
+- The Cloudinary `secure_url` is saved to the event's `coverImage` field.
+- For local dev without Cloudinary, the system falls back to disk storage in `Backend/uploads/`.
+
 ## API Endpoints
 
 ### Authentication
@@ -146,14 +175,14 @@ Open three terminals:
 - `POST /api/auth/admin-login` - Admin login
 
 ### Events
-- `GET /api/events/all` - List events (with pagination, search, filter)
-- `GET /api/events/featured` - Get featured events
-- `GET /api/events/:id` - Get event by ID
-- `POST /api/events/create` - Create event (admin)
+- `GET /api/events/all` - List events (pagination, search, filter)
+- `GET /api/events/featured` - Featured events
+- `GET /api/events/:id` - Event by ID
+- `POST /api/events/create` - Create event (organizer + admin)
 - `PUT /api/events/:id` - Update event
-- `PUT /api/events/status/:id` - Update event status (approve/reject)
-- `PUT /api/events/featured/:id` - Toggle featured
-- `DELETE /api/events/:id` - Delete event
+- `PUT /api/events/status/:id` - Approve/reject (admin)
+- `PUT /api/events/featured/:id` - Toggle featured (admin)
+- `DELETE /api/events/:id` - Delete event (admin)
 - `POST /api/events/like/:id` - Like event
 - `POST /api/events/share/:id` - Share event
 
@@ -164,94 +193,56 @@ Open three terminals:
 - `DELETE /api/category/:id` - Delete category (admin)
 
 ### Organizers
-- `GET /api/organizers/all` - List organizers
 - `GET /api/organizers/approved` - List approved organizers
+- `GET /api/organizers/all` - List all (admin)
 - `POST /api/organizers/create` - Create organizer
-- `PUT /api/organizers/status/:id` - Update organizer status
+- `PUT /api/organizers/status/:id` - Update status (admin)
 
 ### Tickets
 - `POST /api/tickets/create` - Book tickets
-- `GET /api/tickets/user/:userId` - Get user's bookings
-- `GET /api/tickets/event/:eventId` - Get event bookings
+- `GET /api/tickets/user/:userId` - User's bookings
+- `GET /api/tickets/event/:eventId` - Event bookings
 - `POST /api/tickets/cancel/:id` - Cancel booking
 
 ### Users (admin)
 - `GET /api/user` - List all users
-- `GET /api/user/me` - Get current user
+- `GET /api/user/me` - Current user
 
-## Vercel Deployment
+### Payments
+- `POST /api/payments/create-intent` - Create payment intent
+- `POST /api/payments/verify` - Verify payment
 
-### Backend (Vercel)
-
-1. Push backend to a GitHub repo
-2. In Vercel, import the backend directory as a new project
-3. Set Framework Preset: **Other**
-4. Set Root Directory: `Backend`
-5. Add environment variables in Vercel dashboard:
-   ```
-   MONGO_URI=your_mongodb_atlas_connection_string
-   JWT_SECRET=your_secure_jwt_secret
-   NODE_ENV=production
-   CORS_ORIGIN=https://your-frontend.vercel.app
-   ```
-6. Deploy
-
-### Frontend/User (Vercel)
-
-1. Import `Frontend/user` directory in Vercel
-2. Set Framework Preset: **Vite**
-3. Set Root Directory: `Frontend/user`
-4. Add environment variable:
-   ```
-   VITE_API_URL=https://your-backend.vercel.app/api
-   ```
-5. The `vercel.json` already has React Router rewrites configured
-6. Deploy
-
-### Frontend/Admin (Vercel)
-
-1. Import `Frontend/admin` directory in Vercel
-2. Set Framework Preset: **Vite**
-3. Set Root Directory: `Frontend/admin`
-4. Add environment variable:
-   ```
-   VITE_API_URL=https://your-backend.vercel.app/api
-   ```
-5. The `vercel.json` already has React Router rewrites configured
-6. Deploy
-
-## Admin Login
-
-- Go to `http://localhost:3001/admin/login` (or the admin app URL)
-- Register an admin via: `POST /api/admins/create` with `{ name, email, password }`
-- Or create an admin user via the seed script: `npm run create-admin`
-
-## Common Issues
-
-- **CORS errors**: Make sure `Backend/.env` has `CORS_ORIGIN` set to your frontend URL
-- **MongoDB connection**: Verify your `MONGO_URI` and whitelist your IP in Atlas
-- **API not loading**: Check `VITE_API_URL` in frontend `.env` matches your backend URL
-- **Port conflict**: Change `PORT` in `Backend/.env` if 5001 is in use
+### Stats
+- `GET /api/stats/summary` - Platform stats (public)
 
 ## Environment Variables
 
 ### Backend (`Backend/.env`)
-| Variable | Description |
-|----------|-------------|
-| PORT | Server port (default: 5001) |
-| MONGO_URI | MongoDB Atlas connection string |
-| JWT_SECRET | Secret key for JWT tokens |
-| JWT_EXPIRES_IN | Token expiry (default: 7d) |
-| CORS_ORIGIN | Comma-separated allowed origins |
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `PORT` | No | Server port (default: 5001) |
+| `NODE_ENV` | Yes | `development` or `production` |
+| `MONGO_URI` | Yes | MongoDB Atlas connection string |
+| `JWT_SECRET` | Yes | Secret key for JWT tokens (64+ chars) |
+| `JWT_EXPIRES_IN` | No | Token expiry (default: 7d) |
+| `BCRYPT_SALT_ROUNDS` | No | Bcrypt rounds (default: 10) |
+| `SERVICE_FEE_PERCENT` | No | Decimal fee (default: 0.05 = 5%) |
+| `CURRENCY` | No | Payment currency (default: usd) |
+| `CORS_ORIGIN` | Yes | Comma-separated allowed frontend URLs |
+| `CLOUDINARY_CLOUD_NAME` | Yes | Cloudinary cloud name |
+| `CLOUDINARY_API_KEY` | Yes | Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | Yes | Cloudinary API secret |
 
 ### Frontend (`Frontend/user/.env` and `Frontend/admin/.env`)
+
 | Variable | Description |
 |----------|-------------|
-| VITE_API_URL | Backend API base URL |
+| `VITE_API_URL` | Backend API base URL (e.g. `http://localhost:5001/api` or `https://your-backend.vercel.app/api`) |
 
 ## Tech Stack
 
-- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS v4, Zustand, React Query, React Router v6, Axios
-- **Backend**: Node.js, Express 4, TypeScript, Mongoose, JWT, bcryptjs, Zod, Nodemailer
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS v4, Zustand, React Router v6, Axios, shadcn/ui
+- **Backend**: Node.js, Express 4, TypeScript, Mongoose, JWT, bcryptjs, Zod, Cloudinary, Multer
 - **Database**: MongoDB Atlas
-- **Deployment**: Vercel (both frontend and backend)
+- **Deployment**: Vercel (3 independent serverless/Site projects)

@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import { User } from "../src/user/user.model";
+import { Admin } from "../src/admin/admin.schema";
 import { Organizer } from "../src/organizer/organizer.model";
 import { Category } from "../src/category/category.model";
 import { Event } from "../src/event/event.schema";
@@ -25,6 +26,7 @@ const seed = async () => {
         // Clear existing data
         await Promise.all([
             User.deleteMany({}),
+            Admin.deleteMany({}),
             Organizer.deleteMany({}),
             Category.deleteMany({}),
             Event.deleteMany({}),
@@ -71,6 +73,16 @@ const seed = async () => {
         const organizerUser2 = users[2];
 
         console.log("Users created...");
+
+        // Create Admin in the Admin collection (separate from User model)
+        await Admin.create({
+            name: "Admin User",
+            email: "admin@example.com",
+            password: hashedPassword,
+            role: "admin",
+            isVerified: true,
+        });
+        console.log("Admin account created...");
 
         // Create Organizers
         const organizers = await Organizer.create([

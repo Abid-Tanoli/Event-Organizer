@@ -1,22 +1,11 @@
 import { useEffect, useState } from 'react';
-import { eventsAPI } from '@/api/events';
-import { usersAPI } from '@/api/users';
-import { organizersAPI } from '@/api/organizers';
+import { statsAPI, AdminStats } from '@/api/stats';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ErrorState from '@/components/common/ErrorState';
 import { Calendar, Users, Building2, Ticket } from 'lucide-react';
 
-interface Stats {
-  totalEvents: number;
-  totalUsers: number;
-  totalOrganizers: number;
-  totalBookings: number;
-}
-
 const AdminDashboard = () => {
-  const [stats, setStats] = useState<Stats>({
-    totalEvents: 0, totalUsers: 0, totalOrganizers: 0, totalBookings: 0,
-  });
+  const [stats, setStats] = useState<AdminStats | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => { fetchStats(); }, []);
@@ -24,33 +13,22 @@ const AdminDashboard = () => {
   const fetchStats = async () => {
     setError(null);
     try {
-      const [eventsRes, usersRes, organizersRes] = await Promise.all([
-        eventsAPI.getAllEvents({ limit: 1000 }),
-        usersAPI.getAll(),
-        organizersAPI.getAll(),
-      ]);
-      const eventsData = eventsRes.items;
-      const events = Array.isArray(eventsData) ? eventsData : [];
-      const usersData = usersRes;
-      const organizersData = organizersRes.organizers ?? [];
-      setStats({
-        totalEvents: eventsRes.pagination?.total ?? events.length,
-        totalUsers: Array.isArray(usersData) ? usersData.length : 0,
-        totalOrganizers: organizersData.length,
-        totalBookings: events.reduce((sum: number, e: any) => sum + (e.soldTickets || 0), 0),
-      });
+      const data = await statsAPI.getSummary();
+      setStats(data);
     } catch (error) {
       console.error('Failed to fetch stats:', error);
       setError('Failed to load dashboard data. Please try again.');
     }
   };
 
-  const statCards = [
-    { title: 'Total Events', value: stats.totalEvents, icon: Calendar, color: 'text-primary' },
-    { title: 'Total Users', value: stats.totalUsers, icon: Users, color: 'text-accent' },
-    { title: 'Organizers', value: stats.totalOrganizers, icon: Building2, color: 'text-secondary-foreground' },
-    { title: 'Tickets Sold', value: stats.totalBookings, icon: Ticket, color: 'text-muted-foreground' },
-  ];
+  const statCards = stats
+    ? [
+        { title: 'Total Events', value: stats.totalEvents, icon: Calendar, color: 'text-primary' },
+        { title: 'Total Users', value: stats.totalUsers, icon: Users, color: 'text-accent' },
+        { title: 'Organizers', value: stats.totalOrganizers, icon: Building2, color: 'text-secondary-foreground' },
+        { title: 'Tickets Sold', value: stats.totalTicketsSold, icon: Ticket, color: 'text-muted-foreground' },
+      ]
+    : [];
 
   return (
     <div className="min-h-screen bg-muted/30">

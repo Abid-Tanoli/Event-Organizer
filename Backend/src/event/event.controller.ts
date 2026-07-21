@@ -4,6 +4,7 @@ import { Event } from "./event.schema";
 import { Organizer } from "../organizer/organizer.model";
 import { AuthRequest } from "../auth/auth.middleware";
 import { EVENTS_PER_PAGE } from "../config/constants";
+import { uploadBufferToCloudinary } from "../config/cloudinary";
 
 export const createEvent = async (req: AuthRequest, res: Response) => {
   try {
@@ -39,8 +40,18 @@ export const createEvent = async (req: AuthRequest, res: Response) => {
 
     const totalTickets = ticketTypes.reduce((sum: number, t: any) => sum + t.quantity, 0);
 
-    // Handle file upload from multer
-    const coverImage = req.file ? `/uploads/${req.file.filename}` : (rest.coverImage || "");
+    // Handle file upload: Cloudinary (memory buffer) or disk storage fallback
+    let coverImage = rest.coverImage || "";
+    if (req.file) {
+      if (req.file.buffer) {
+        // Cloudinary path: upload buffer
+        const url = await uploadBufferToCloudinary(req.file.buffer);
+        if (url) coverImage = url;
+      } else {
+        // Disk storage fallback
+        coverImage = `/uploads/${req.file.filename}`;
+      }
+    }
 
     const event = await Event.create({
       organizer: organizerId,
@@ -161,9 +172,14 @@ export const updateEvent = async (req: AuthRequest<{ id: string }>, res: Respons
     }
 
     const updateData: any = { ...req.body };
-    // Handle file upload from multer
+    // Handle file upload: Cloudinary (memory buffer) or disk storage fallback
     if (req.file) {
-      updateData.coverImage = `/uploads/${req.file.filename}`;
+      if (req.file.buffer) {
+        const url = await uploadBufferToCloudinary(req.file.buffer);
+        if (url) updateData.coverImage = url;
+      } else {
+        updateData.coverImage = `/uploads/${req.file.filename}`;
+      }
     }
     // Parse JSON string fields that come via FormData
     try {

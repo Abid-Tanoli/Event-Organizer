@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/table';
 import Pagination from '@/components/common/Pagination';
 import Loader from '@/components/common/Loader';
+import EmptyState from '@/components/common/EmptyState';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -98,10 +99,7 @@ const AdminUsers: React.FC = () => {
         {loading ? (
           <Loader />
         ) : users.length === 0 ? (
-          <div className="bg-card rounded-xl shadow-lg p-12 text-center">
-            <Users className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-            <p className="text-xl text-muted-foreground">No users found</p>
-          </div>
+          <EmptyState icon={Users} title="No users found" description="No users have registered yet." />
         ) : (
           <div className="bg-card rounded-xl shadow-lg overflow-hidden">
             <Table>
