@@ -19,11 +19,20 @@ const ensureDB = async (_req: any, _res: any, next: any) => {
 };
 
 const handler = async (req: any, res: any) => {
-  if (!dbConnected) {
-    await connectDB();
-    dbConnected = true;
+  try {
+    if (!dbConnected) {
+      console.log("Connecting to DB...");
+      console.log("MONGO_URI present:", !!process.env.MONGO_URI);
+      console.log("NODE_ENV:", process.env.NODE_ENV);
+      await connectDB();
+      dbConnected = true;
+      console.log("DB connected successfully");
+    }
+    return app(req, res);
+  } catch (err: any) {
+    console.error("Handler error:", err.message, err.stack);
+    res.status(500).json({ success: false, message: err.message || "Internal server error" });
   }
-  return app(req, res);
 };
 
 export default handler;
